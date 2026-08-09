@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+html, body, #root {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden !important;
+  box-sizing: border-box;
+}
+
+*, ::before, ::after {
+  box-sizing: border-box;
+}
+
+/* Hide scrollbars when desired */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@media print {
+  /* Hide all UI header, navigation, sidebars, buttons and modals during printing */
+  nav, header, button, .no-print, [role="dialog"], .customizer-panel {
+    display: none !important;
+  }
+  
+  body, main {
+    background: white !important;
+    color: black !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  .resume-print-document {
+    transform: none !important;
+    box-shadow: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}
