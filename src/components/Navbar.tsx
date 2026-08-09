@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { ResumeData } from "../types";
 import { UndoRedoControls } from "./common/UndoRedoControls";
+import { CVMintLogo } from "./common/CVMintLogo";
 import {
   FileText,
   Download,
@@ -83,14 +84,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
 
             {/* Brand Logo */}
-            <div className="flex items-center gap-2.5 flex-shrink-0 cursor-pointer" onClick={() => navTabClick("dashboard")}>
-              <div className="w-9 h-9 bg-emerald-600 rounded-lg flex items-center justify-center text-white font-extrabold text-lg tracking-tight">
-                C
-              </div>
-              <span className="text-xl font-black tracking-tight text-slate-900">
-                Cv<span className="text-emerald-600">Mint</span>
-              </span>
-            </div>
+            <CVMintLogo size="md" onClick={() => navTabClick("dashboard")} />
           </div>
 
           {/* Desktop Central Navigation Links (Visible on Large screens lg:flex) */}
@@ -302,14 +296,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="space-y-6">
               {/* Drawer Header */}
               <div className="flex items-center justify-between pb-4 border-b border-slate-200">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center text-white font-extrabold text-base">
-                    C
-                  </div>
-                  <span className="text-lg font-black tracking-tight text-slate-900">
-                    Cv<span className="text-emerald-600">Mint</span> Navigation
-                  </span>
-                </div>
+                <CVMintLogo size="sm" onClick={() => navTabClick("dashboard")} />
 
                 <button
                   onClick={() => setMobileDrawerOpen(false)}

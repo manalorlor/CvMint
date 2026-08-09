@@ -1,5 +1,6 @@
 import React from "react";
 import { Sparkles, Layout, Wand2, ArrowRight, ShieldCheck, Zap } from "lucide-react";
+import { CVMintLogo } from "../common/CVMintLogo";
 
 interface WelcomeHeroProps {
   onCreateClick: () => void;
@@ -15,9 +16,12 @@ export const WelcomeHero: React.FC<WelcomeHeroProps> = ({ onCreateClick, onTempl
           <Sparkles className="w-3.5 h-3.5 text-emerald-600" /> 100% ATS-Compliant & Verified
         </div>
 
-        <h1 className="text-3xl md:text-5xl font-black tracking-tight leading-tight text-slate-900">
-          Welcome to <span className="text-emerald-600">CvMint</span> — <span className="text-slate-800">ATS Resume Builder</span>
-        </h1>
+        <div className="flex items-center gap-4 flex-wrap">
+          <CVMintLogo size="lg" showText={false} />
+          <h1 className="text-3xl md:text-5xl font-black tracking-tight leading-tight text-slate-900">
+            Welcome to <span className="text-emerald-600">CvMint</span> — <span className="text-slate-800">ATS Resume Builder</span>
+          </h1>
+        </div>
 
         <p className="text-base md:text-lg text-slate-600 font-medium leading-relaxed">
           Build a polished, employer-ready CV in minutes. Powered by intelligent ATS scoring, active verbs analysis, tailored job bullet generators, and 15+ professionally formatted templates.
