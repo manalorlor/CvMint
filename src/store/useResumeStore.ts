@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { ResumeData, TemplateInfo } from "../types";
 import { DEFAULT_RESUME } from "../data/defaultResume";
-import { auth, saveResumeToFirestore, deleteResumeFromFirestore } from "../lib/firebase";
+import { supabase, saveResumeToSupabase, deleteResumeFromSupabase, isSupabaseConfigured } from "../lib/supabase";
 
 const MAX_HISTORY = 50;
 const STORAGE_KEY = "cv_app_resumes";
@@ -52,12 +52,15 @@ const saveResumesToStorage = (resumes: ResumeData[]) => {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(resumes));
     // If user is authenticated, sync active resume or entire set asynchronously
-    const user = auth.currentUser;
-    if (user) {
-      resumes.forEach((resume) => {
-        saveResumeToFirestore(user.uid, resume).catch((err) =>
-          console.error("Firestore sync error:", err)
-        );
+    if (isSupabaseConfigured) {
+      supabase.auth.getUser().then(({ data: { user } }) => {
+        if (user) {
+          resumes.forEach((resume) => {
+            saveResumeToSupabase(user.id, resume).catch((err) =>
+              console.error("Supabase sync error:", err)
+            );
+          });
+        }
       });
     }
   } catch (e) {
@@ -209,11 +212,14 @@ export const useResumeStore = create<ResumeStoreState>((set, get) => {
       const { resumes, activeResumeId } = get();
       if (resumes.length <= 1) return;
 
-      const user = auth.currentUser;
-      if (user) {
-        deleteResumeFromFirestore(user.uid, id).catch((err) =>
-          console.error("Failed to delete resume from Firestore:", err)
-        );
+      if (isSupabaseConfigured) {
+        supabase.auth.getUser().then(({ data: { user } }) => {
+          if (user) {
+            deleteResumeFromSupabase(user.id, id).catch((err) =>
+              console.error("Failed to delete resume from Supabase:", err)
+            );
+          }
+        });
       }
 
       const remaining = resumes.filter((r) => r.id !== id);

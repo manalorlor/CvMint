@@ -1,0 +1,156 @@
+import { createClient, User } from '@supabase/supabase-js';
+import { ResumeData } from '../types';
+
+const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL as string) || '';
+const supabaseAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY as string) || '';
+
+export const isSupabaseConfigured = Boolean(
+  supabaseUrl && supabaseAnonKey && !supabaseUrl.includes('placeholder')
+);
+
+// Fallback client prevents runtime crashes when env vars are not set
+export const supabase = createClient(
+  supabaseUrl || 'https://placeholder.supabase.co',
+  supabaseAnonKey || 'placeholder-key'
+);
+
+export type { User };
+
+// Google Auth Handler
+export async function signInWithGoogle(): Promise<void> {
+  if (!isSupabaseConfigured) {
+    throw new Error(
+      "Supabase is not configured yet. Please add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your Netlify / environment variables."
+    );
+  }
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: window.location.origin,
+    },
+  });
+  if (error) throw error;
+}
+
+// Email/Password Handlers
+export async function signUpWithEmail(
+  email: string,
+  pass: string,
+  displayName: string
+): Promise<User | null> {
+  if (!isSupabaseConfigured) {
+    throw new Error(
+      "Supabase is not configured yet. Please add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in Netlify / environment settings."
+    );
+  }
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password: pass,
+    options: {
+      data: {
+        display_name: displayName,
+      },
+    },
+  });
+  if (error) throw error;
+
+  if (data.user) {
+    try {
+      await supabase.from('profiles').upsert({
+        id: data.user.id,
+        email: data.user.email,
+        display_name: displayName,
+        updated_at: new Date().toISOString(),
+      });
+    } catch (e) {
+      console.warn('Could not create profile record:', e);
+    }
+  }
+  return data.user;
+}
+
+export async function signInWithEmail(email: string, pass: string): Promise<User | null> {
+  if (!isSupabaseConfigured) {
+    throw new Error(
+      "Supabase is not configured yet. Please add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in Netlify / environment settings."
+    );
+  }
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password: pass,
+  });
+  if (error) throw error;
+  return data.user;
+}
+
+export async function sendPasswordResetLink(email: string): Promise<void> {
+  if (!isSupabaseConfigured) {
+    throw new Error(
+      "Supabase is not configured yet. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY."
+    );
+  }
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}`,
+  });
+  if (error) throw error;
+}
+
+export async function logOut(): Promise<void> {
+  if (!isSupabaseConfigured) return;
+  const { error } = await supabase.auth.signOut();
+  if (error) console.error('Supabase sign out error:', error);
+}
+
+export async function deleteAccountAndData(userId: string): Promise<void> {
+  if (!isSupabaseConfigured) return;
+  try {
+    await supabase.from('resumes').delete().eq('user_id', userId);
+    await supabase.from('profiles').delete().eq('id', userId);
+  } catch (err) {
+    console.warn('Could not delete user Supabase records:', err);
+  }
+  await supabase.auth.signOut();
+}
+
+// Supabase Resume Operations
+export async function saveResumeToSupabase(userId: string, resume: ResumeData): Promise<void> {
+  if (!isSupabaseConfigured) return;
+  const { error } = await supabase.from('resumes').upsert({
+    id: resume.id,
+    user_id: userId,
+    title: resume.title,
+    target_job_title: resume.targetJobTitle || '',
+    resume_data: resume,
+    updated_at: new Date().toISOString(),
+  });
+  if (error) {
+    console.error('Supabase save resume error:', error);
+  }
+}
+
+export async function deleteResumeFromSupabase(userId: string, resumeId: string): Promise<void> {
+  if (!isSupabaseConfigured) return;
+  const { error } = await supabase
+    .from('resumes')
+    .delete()
+    .eq('id', resumeId)
+    .eq('user_id', userId);
+  if (error) {
+    console.error('Supabase delete resume error:', error);
+  }
+}
+
+export async function fetchUserResumesFromSupabase(userId: string): Promise<ResumeData[]> {
+  if (!isSupabaseConfigured) return [];
+  const { data, error } = await supabase
+    .from('resumes')
+    .select('resume_data')
+    .eq('user_id', userId);
+
+  if (error) {
+    console.error('Supabase fetch resumes error:', error);
+    return [];
+  }
+  if (!data) return [];
+  return data.map((item) => item.resume_data as ResumeData).filter(Boolean);
+}

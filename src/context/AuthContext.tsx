@@ -1,19 +1,17 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { User } from "firebase/auth";
 import {
-  auth,
+  supabase,
+  User,
   signInWithGoogle,
   signUpWithEmail,
   signInWithEmail,
   sendPasswordResetLink,
   deleteAccountAndData,
   logOut,
-  onAuthStateChanged,
-  testConnection,
-  fetchUserResumesFromFirestore,
-  saveResumeToFirestore,
-  deleteResumeFromFirestore,
-} from "../lib/firebase";
+  fetchUserResumesFromSupabase,
+  saveResumeToSupabase,
+  isSupabaseConfigured,
+} from "../lib/supabase";
 import { useResumeStore } from "../store/useResumeStore";
 
 interface AuthContextType {
@@ -28,6 +26,7 @@ interface AuthContextType {
   syncCloudResumes: () => Promise<void>;
   isSyncing: boolean;
   lastSyncedAt: Date | null;
+  isSupabaseConfigured: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -41,61 +40,67 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { resumes, setResumes } = useResumeStore();
 
   useEffect(() => {
-    testConnection();
+    if (!isSupabaseConfigured) {
+      setLoading(false);
+      return;
+    }
 
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      const user = session?.user ?? null;
       setCurrentUser(user);
       setLoading(false);
 
       if (user) {
-        // Fetch user's resumes from Firestore
-        try {
-          setIsSyncing(true);
-          const cloudResumes = await fetchUserResumesFromFirestore(user.uid);
-          if (cloudResumes && cloudResumes.length > 0) {
-            setResumes(cloudResumes);
-            setLastSyncedAt(new Date());
-          } else if (resumes.length > 0) {
-            // Upload local resumes to Firestore for first-time cloud setup
-            for (const resume of resumes) {
-              await saveResumeToFirestore(user.uid, resume);
-            }
-            setLastSyncedAt(new Date());
-          }
-        } catch (err) {
-          console.error("Error syncing Firestore resumes on auth state change:", err);
-        } finally {
-          setIsSyncing(false);
-        }
+        syncUserResumesOnLoad(user.id);
       }
     });
 
-    return () => unsubscribe();
+    // Listen for auth state changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      const user = session?.user ?? null;
+      setCurrentUser(user);
+      setLoading(false);
+
+      if (user) {
+        await syncUserResumesOnLoad(user.id);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
+
+  const syncUserResumesOnLoad = async (userId: string) => {
+    try {
+      setIsSyncing(true);
+      const cloudResumes = await fetchUserResumesFromSupabase(userId);
+      if (cloudResumes && cloudResumes.length > 0) {
+        setResumes(cloudResumes);
+        setLastSyncedAt(new Date());
+      } else if (resumes.length > 0) {
+        for (const resume of resumes) {
+          await saveResumeToSupabase(userId, resume);
+        }
+        setLastSyncedAt(new Date());
+      }
+    } catch (err) {
+      console.error("Error syncing Supabase resumes on load:", err);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   const loginWithGoogle = async () => {
     try {
       setIsSyncing(true);
-      const user = await signInWithGoogle();
-      if (user) {
-        const cloudResumes = await fetchUserResumesFromFirestore(user.uid);
-        if (cloudResumes && cloudResumes.length > 0) {
-          setResumes(cloudResumes);
-        } else {
-          for (const resume of resumes) {
-            await saveResumeToFirestore(user.uid, resume);
-          }
-        }
-        setLastSyncedAt(new Date());
-      }
+      await signInWithGoogle();
     } catch (err: any) {
-      if (
-        err?.code !== "auth/popup-closed-by-user" &&
-        err?.code !== "auth/cancelled-popup-request" &&
-        err?.code !== "auth/popup-blocked"
-      ) {
-        console.error("Failed to sign in with Google:", err);
-      }
+      console.error("Failed to sign in with Google:", err);
+      throw err;
     } finally {
       setIsSyncing(false);
     }
@@ -107,7 +112,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const user = await signUpWithEmail(email, pass, name);
       if (user && resumes.length > 0) {
         for (const resume of resumes) {
-          await saveResumeToFirestore(user.uid, resume);
+          await saveResumeToSupabase(user.id, resume);
         }
       }
       setLastSyncedAt(new Date());
@@ -121,12 +126,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsSyncing(true);
       const user = await signInWithEmail(email, pass);
       if (user) {
-        const cloudResumes = await fetchUserResumesFromFirestore(user.uid);
+        const cloudResumes = await fetchUserResumesFromSupabase(user.id);
         if (cloudResumes && cloudResumes.length > 0) {
           setResumes(cloudResumes);
         } else {
           for (const resume of resumes) {
-            await saveResumeToFirestore(user.uid, resume);
+            await saveResumeToSupabase(user.id, resume);
           }
         }
         setLastSyncedAt(new Date());
@@ -144,7 +149,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!currentUser) return;
     try {
       setIsSyncing(true);
-      await deleteAccountAndData(currentUser);
+      await deleteAccountAndData(currentUser.id);
       setCurrentUser(null);
     } finally {
       setIsSyncing(false);
@@ -154,6 +159,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logoutUser = async () => {
     try {
       await logOut();
+      setCurrentUser(null);
     } catch (err) {
       console.error("Failed to log out:", err);
     }
@@ -164,11 +170,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setIsSyncing(true);
       for (const resume of resumes) {
-        await saveResumeToFirestore(currentUser.uid, resume);
+        await saveResumeToSupabase(currentUser.id, resume);
       }
       setLastSyncedAt(new Date());
     } catch (err) {
-      console.error("Failed to sync resumes to cloud:", err);
+      console.error("Failed to sync resumes to Supabase:", err);
     } finally {
       setIsSyncing(false);
     }
@@ -188,6 +194,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         syncCloudResumes,
         isSyncing,
         lastSyncedAt,
+        isSupabaseConfigured,
       }}
     >
       {children}

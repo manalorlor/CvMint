@@ -50,10 +50,8 @@ export const AuthLandingPage: React.FC<AuthLandingPageProps> = ({ onContinueAsGu
     } catch (err: any) {
       console.error("Password recovery error:", err);
       const code = err?.code || "";
-      if (code === "auth/user-not-found" || code === "auth/invalid-email") {
+      if (code === "auth/user-not-found" || code === "auth/invalid-email" || err?.message?.includes("User not found")) {
         setAuthError("No account found matching that email address.");
-      } else if (code === "auth/operation-not-allowed" || err?.message?.includes("operation-not-allowed")) {
-        setAuthError("Email/Password sign-in is disabled in your Firebase project. To enable it:\n1. Go to Firebase Console -> Authentication -> Sign-in method.\n2. Click 'Email/Password' under Native Providers.\n3. Enable 'Email/Password' and click Save.");
       } else {
         setAuthError(err?.message || "Failed to send reset email. Please try again.");
       }
@@ -96,19 +94,15 @@ export const AuthLandingPage: React.FC<AuthLandingPageProps> = ({ onContinueAsGu
       }
     } catch (err: any) {
       console.error("Auth error:", err);
-      const code = err?.code || "";
-      if (code === "auth/email-already-in-use") {
+      const msg = err?.message || "";
+      if (msg.includes("already registered") || msg.includes("User already registered")) {
         setAuthError("An account with this email address already exists. Please sign in instead.");
-      } else if (code === "auth/wrong-password" || code === "auth/user-not-found" || code === "auth/invalid-credential") {
+      } else if (msg.includes("Invalid login credentials")) {
         setAuthError("Invalid email or password. Please double check and try again.");
-      } else if (code === "auth/weak-password") {
+      } else if (msg.includes("Password should be at least")) {
         setAuthError("Password is too weak. Please use a stronger password.");
-      } else if (code === "auth/invalid-email") {
-        setAuthError("Please enter a valid email address.");
-      } else if (code === "auth/operation-not-allowed" || err?.message?.includes("operation-not-allowed")) {
-        setAuthError("Email/Password sign-in is disabled in your Firebase project. To enable it:\n1. Go to Firebase Console -> Authentication -> Sign-in method.\n2. Click 'Email/Password' under Native Providers.\n3. Enable 'Email/Password' and click Save.");
       } else {
-        setAuthError(err?.message || "Authentication failed. Please check your details and try again.");
+        setAuthError(msg || "Authentication failed. Please check your details and try again.");
       }
     } finally {
       setIsAuthenticating(false);
@@ -269,7 +263,7 @@ export const AuthLandingPage: React.FC<AuthLandingPageProps> = ({ onContinueAsGu
           {authError && (
             <div className="mb-4 p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-medium leading-relaxed whitespace-pre-line">
               {authError}
-              {authError.includes("Firebase Console") && onContinueAsGuest && (
+              {authError.includes("Supabase is not configured") && onContinueAsGuest && (
                 <div className="mt-2.5 pt-2 border-t border-amber-200/80">
                   <button
                     type="button"
