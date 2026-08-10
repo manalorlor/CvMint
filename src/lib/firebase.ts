@@ -21,8 +21,24 @@ import {
   getDocs,
   collection,
 } from "firebase/firestore";
-import firebaseConfig from "../../firebase-applet-config.json";
 import { ResumeData } from "../types";
+
+// Safely load local applet config if present, or fall back gracefully
+const appletConfigs = import.meta.glob<{ default: Record<string, string> }>(
+  "../../firebase-applet-config.json",
+  { eager: true }
+);
+const defaultConfig = Object.values(appletConfigs)[0]?.default || {};
+
+export const firebaseConfig = {
+  apiKey: (import.meta.env.VITE_FIREBASE_API_KEY as string) || defaultConfig.apiKey || "",
+  authDomain: (import.meta.env.VITE_FIREBASE_AUTH_DOMAIN as string) || defaultConfig.authDomain || "",
+  projectId: (import.meta.env.VITE_FIREBASE_PROJECT_ID as string) || defaultConfig.projectId || "",
+  storageBucket: (import.meta.env.VITE_FIREBASE_STORAGE_BUCKET as string) || defaultConfig.storageBucket || "",
+  messagingSenderId: (import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID as string) || defaultConfig.messagingSenderId || "",
+  appId: (import.meta.env.VITE_FIREBASE_APP_ID as string) || defaultConfig.appId || "",
+  firestoreDatabaseId: (import.meta.env.VITE_FIREBASE_DATABASE_ID as string) || defaultConfig.firestoreDatabaseId || "",
+};
 
 // Initialize Firebase
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);

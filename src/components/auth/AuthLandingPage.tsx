@@ -52,6 +52,8 @@ export const AuthLandingPage: React.FC<AuthLandingPageProps> = ({ onContinueAsGu
       const code = err?.code || "";
       if (code === "auth/user-not-found" || code === "auth/invalid-email") {
         setAuthError("No account found matching that email address.");
+      } else if (code === "auth/operation-not-allowed" || err?.message?.includes("operation-not-allowed")) {
+        setAuthError("Email/Password sign-in is disabled in your Firebase project. To enable it:\n1. Go to Firebase Console -> Authentication -> Sign-in method.\n2. Click 'Email/Password' under Native Providers.\n3. Enable 'Email/Password' and click Save.");
       } else {
         setAuthError(err?.message || "Failed to send reset email. Please try again.");
       }
@@ -103,6 +105,8 @@ export const AuthLandingPage: React.FC<AuthLandingPageProps> = ({ onContinueAsGu
         setAuthError("Password is too weak. Please use a stronger password.");
       } else if (code === "auth/invalid-email") {
         setAuthError("Please enter a valid email address.");
+      } else if (code === "auth/operation-not-allowed" || err?.message?.includes("operation-not-allowed")) {
+        setAuthError("Email/Password sign-in is disabled in your Firebase project. To enable it:\n1. Go to Firebase Console -> Authentication -> Sign-in method.\n2. Click 'Email/Password' under Native Providers.\n3. Enable 'Email/Password' and click Save.");
       } else {
         setAuthError(err?.message || "Authentication failed. Please check your details and try again.");
       }
@@ -263,8 +267,19 @@ export const AuthLandingPage: React.FC<AuthLandingPageProps> = ({ onContinueAsGu
           </div>
 
           {authError && (
-            <div className="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-medium leading-relaxed">
+            <div className="mb-4 p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-medium leading-relaxed whitespace-pre-line">
               {authError}
+              {authError.includes("Firebase Console") && onContinueAsGuest && (
+                <div className="mt-2.5 pt-2 border-t border-amber-200/80">
+                  <button
+                    type="button"
+                    onClick={onContinueAsGuest}
+                    className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-[11px] font-semibold transition cursor-pointer"
+                  >
+                    Continue as Guest for now
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
