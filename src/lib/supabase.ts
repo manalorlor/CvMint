@@ -1,8 +1,13 @@
 import { createClient, User } from '@supabase/supabase-js';
 import { ResumeData } from '../types';
 
-const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL as string) || '';
-const supabaseAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY as string) || '';
+let rawUrl = (import.meta.env.VITE_SUPABASE_URL as string) || '';
+const supabaseAnonKey = ((import.meta.env.VITE_SUPABASE_ANON_KEY as string) || '').trim();
+
+// Sanitize URL: strip trailing slashes, spaces, and accidental path suffixes like /auth/v1 or /rest/v1
+rawUrl = rawUrl.trim().replace(/\/+$/, ''); // Remove trailing slashes
+rawUrl = rawUrl.replace(/\/(auth|rest)\/v1\/?$/i, ''); // Strip /auth/v1 or /rest/v1 if included
+const supabaseUrl = rawUrl;
 
 export const isSupabaseConfigured = Boolean(
   supabaseUrl && supabaseAnonKey && !supabaseUrl.includes('placeholder')
