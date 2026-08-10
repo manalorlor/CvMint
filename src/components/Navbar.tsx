@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { ResumeData } from "../types";
 import { UndoRedoControls } from "./common/UndoRedoControls";
 import { CVMintLogo } from "./common/CVMintLogo";
+import { AuthUserMenu } from "./common/AuthUserMenu";
 import {
   FileText,
   Download,
@@ -42,6 +43,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   resume,
   onOpenTemplates,
   onOpenAts,
+  onOpenAdmin,
   exportFormat,
   setExportFormat,
   onPrint,
@@ -69,22 +71,22 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <>
       <nav className="sticky top-0 z-40 bg-white border-b border-slate-200/90 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
+        <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-1 sm:gap-3 overflow-x-clip">
           {/* Left: Mobile & Tablet Hamburger Menu Toggle + Brand Logo */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
             {/* Hamburger Button for Mobile & Tablet view */}
             <button
               type="button"
               onClick={() => setMobileDrawerOpen(true)}
-              className="lg:hidden p-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-slate-900 border border-slate-200 transition flex items-center gap-1.5"
+              className="lg:hidden p-1.5 sm:p-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-slate-900 border border-slate-200 transition flex items-center gap-1.5 flex-shrink-0"
               aria-label="Open Navigation Menu"
             >
               <Menu className="w-5 h-5 text-slate-700" />
               <span className="text-xs font-bold hidden sm:inline text-slate-700">Menu</span>
             </button>
 
-            {/* Brand Logo */}
-            <CVMintLogo size="md" onClick={() => navTabClick("dashboard")} />
+            {/* Brand Logo - Hide text on tiny screens so right controls stay 100% visible */}
+            <CVMintLogo size="md" hideTextOnMobile onClick={() => navTabClick("dashboard")} />
           </div>
 
           {/* Desktop Central Navigation Links (Visible on Large screens lg:flex) */}
@@ -139,14 +141,16 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           {/* Right Tools & Export Dropdown */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
             {/* Stack Undo/Redo */}
-            <UndoRedoControls size="sm" />
+            <div className="hidden min-[380px]:flex flex-shrink-0">
+              <UndoRedoControls size="sm" />
+            </div>
 
             {/* Templates Modal */}
             <button
               onClick={onOpenTemplates}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg border border-slate-200 transition"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg border border-slate-200 transition flex-shrink-0"
             >
               <Layout className="w-3.5 h-3.5 text-slate-600" />
               <span>Templates</span>
@@ -156,7 +160,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* ATS Analyzer Button */}
             <button
               onClick={onOpenAts}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-slate-800 hover:bg-slate-900 text-white rounded-lg transition"
+              className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs font-bold bg-slate-800 hover:bg-slate-900 text-white rounded-lg transition flex-shrink-0"
             >
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
               <span className="hidden xs:inline">ATS Check</span>
@@ -164,10 +168,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
 
             {/* Export Dropdown */}
-            <div className="relative">
+            <div className="relative flex-shrink-0">
               <button
                 onClick={() => setExportOpen(!exportOpen)}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition"
+                className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition shadow-xs flex-shrink-0"
               >
                 <Download className="w-3.5 h-3.5" />
                 <span>Export</span>
@@ -181,14 +185,16 @@ export const Navbar: React.FC<NavbarProps> = ({
                     onClick={() => setExportOpen(false)}
                   />
 
-                  <div className="absolute right-0 mt-2 w-56 bg-white text-slate-900 rounded-xl shadow-lg border border-slate-200 py-2 z-50 text-xs font-semibold space-y-1">
+                  <div className="absolute right-0 mt-2 w-56 sm:w-60 max-w-[calc(100vw-1rem)] bg-white text-slate-900 rounded-xl shadow-xl border border-slate-200 py-2 z-50 text-xs font-semibold space-y-1">
                     <div className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                      Format
+                      Format Options
                     </div>
                     <button
                       type="button"
                       onClick={() => {
                         setExportFormat("docx");
+                        setExportOpen(false);
+                        onExportDocx();
                       }}
                       className={`w-full text-left px-4 py-2 flex items-center justify-between transition ${
                         exportFormat === "docx"
@@ -207,6 +213,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                       type="button"
                       onClick={() => {
                         setExportFormat("pdf");
+                        setExportOpen(false);
+                        onExportPdf();
                       }}
                       className={`w-full text-left px-4 py-2 flex items-center justify-between transition ${
                         exportFormat === "pdf"
@@ -278,6 +286,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </>
               )}
             </div>
+
+            {/* Firebase Auth & User Menu */}
+            <AuthUserMenu onOpenAdmin={onOpenAdmin} />
           </div>
         </div>
       </nav>
@@ -403,13 +414,87 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <ShieldCheck className="w-4 h-4 text-emerald-600" />
                   <span>ATS Keyword Checker</span>
                 </button>
+
+                <button
+                  onClick={() => {
+                    setMobileDrawerOpen(false);
+                    onOpenAdmin();
+                  }}
+                  className="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 transition flex items-center gap-3"
+                >
+                  <FileText className="w-4 h-4 text-slate-500" />
+                  <span>System Admin Panel</span>
+                </button>
+              </div>
+              {/* Export & Download Section */}
+              <div className="pt-4 border-t border-slate-200 space-y-2">
+                <div className="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                  Export & Downloads
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 px-1">
+                  <button
+                    onClick={() => {
+                      setMobileDrawerOpen(false);
+                      onExportDocx();
+                    }}
+                    className="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl text-xs font-bold border border-blue-200 transition shadow-2xs"
+                  >
+                    <FileText className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                    <span>Word (.docx)</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setMobileDrawerOpen(false);
+                      onExportPdf();
+                    }}
+                    className="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl text-xs font-bold border border-rose-200 transition shadow-2xs"
+                  >
+                    <FileText className="w-4 h-4 text-rose-600 flex-shrink-0" />
+                    <span>PDF Doc</span>
+                  </button>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setMobileDrawerOpen(false);
+                    onPrint();
+                  }}
+                  className="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 transition flex items-center gap-3"
+                >
+                  <Download className="w-4 h-4 text-slate-500" />
+                  <span>Print Preview & Export</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setMobileDrawerOpen(false);
+                    onExportTxt();
+                  }}
+                  className="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 transition flex items-center gap-3"
+                >
+                  <FileCode className="w-4 h-4 text-slate-500" />
+                  <span>Plain Text (.txt)</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setMobileDrawerOpen(false);
+                    onExportJson();
+                  }}
+                  className="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 transition flex items-center gap-3"
+                >
+                  <Download className="w-4 h-4 text-slate-500" />
+                  <span>Backup CV (.json)</span>
+                </button>
               </div>
             </div>
 
             {/* Drawer Footer */}
             <div className="pt-4 border-t border-slate-200 text-center space-y-2">
               <p className="text-[11px] text-slate-500 font-medium">
-                CvMint — Professional ATS CV Builder
+                CvMinter — Professional ATS CV Builder
               </p>
             </div>
           </div>

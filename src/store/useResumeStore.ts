@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { ResumeData, TemplateInfo } from "../types";
 import { DEFAULT_RESUME } from "../data/defaultResume";
+import { auth, saveResumeToFirestore, deleteResumeFromFirestore } from "../lib/firebase";
 
 const MAX_HISTORY = 50;
 const STORAGE_KEY = "cv_app_resumes";
@@ -50,8 +51,17 @@ const loadSavedResumes = (): ResumeData[] => {
 const saveResumesToStorage = (resumes: ResumeData[]) => {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(resumes));
+    // If user is authenticated, sync active resume or entire set asynchronously
+    const user = auth.currentUser;
+    if (user) {
+      resumes.forEach((resume) => {
+        saveResumeToFirestore(user.uid, resume).catch((err) =>
+          console.error("Firestore sync error:", err)
+        );
+      });
+    }
   } catch (e) {
-    console.error("Failed to save resumes to localStorage:", e);
+    console.error("Failed to save resumes to storage:", e);
   }
 };
 
@@ -198,6 +208,13 @@ export const useResumeStore = create<ResumeStoreState>((set, get) => {
     deleteResume: (id: string) => {
       const { resumes, activeResumeId } = get();
       if (resumes.length <= 1) return;
+
+      const user = auth.currentUser;
+      if (user) {
+        deleteResumeFromFirestore(user.uid, id).catch((err) =>
+          console.error("Failed to delete resume from Firestore:", err)
+        );
+      }
 
       const remaining = resumes.filter((r) => r.id !== id);
       const nextActiveId = activeResumeId === id ? remaining[0].id : activeResumeId;

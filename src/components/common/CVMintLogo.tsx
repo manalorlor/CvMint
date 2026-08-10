@@ -1,9 +1,10 @@
 import React from "react";
-import logoImg from "../../assets/images/app_logo_cvmint_1786311272438.jpg";
+import logoImg from "../../assets/images/main_logo_cvminter_1786355476552.jpg";
 
 interface CVMintLogoProps {
   size?: "sm" | "md" | "lg" | "xl";
   showText?: boolean;
+  hideTextOnMobile?: boolean;
   showTagline?: boolean;
   className?: string;
   onClick?: () => void;
@@ -12,6 +13,7 @@ interface CVMintLogoProps {
 export const CVMintLogo: React.FC<CVMintLogoProps> = ({
   size = "md",
   showText = true,
+  hideTextOnMobile = false,
   showTagline = false,
   className = "",
   onClick,
@@ -38,16 +40,16 @@ export const CVMintLogo: React.FC<CVMintLogoProps> = ({
       <div className={`relative flex-shrink-0 ${sizeMap[size]} rounded-xl overflow-hidden bg-white shadow-xs border border-emerald-100 p-0.5`}>
         <img
           src={logoImg}
-          alt="CVMint Logo"
+          alt="CVMinter Logo"
           referrerPolicy="no-referrer"
           className="w-full h-full object-cover rounded-lg"
         />
       </div>
 
       {showText && (
-        <div className="flex flex-col">
+        <div className={`flex flex-col ${hideTextOnMobile ? "hidden min-[380px]:flex" : ""}`}>
           <span className={`font-black tracking-tight text-slate-900 ${textSizeMap[size]} leading-none`}>
-            CV<span className="text-emerald-600">Mint</span>
+            CV<span className="text-emerald-600">Minter</span>
           </span>
           {showTagline && (
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600 mt-1">

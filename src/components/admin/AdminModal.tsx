@@ -1,12 +1,16 @@
 import React, { useState } from "react";
-import { X, Settings, ShieldAlert, Cpu, Sparkles, Layers, DollarSign, MessageSquare, Check } from "lucide-react";
+import { X, Settings, ShieldAlert, Cpu, Sparkles, Layers, Users, DollarSign, MessageSquare, Check, Lock } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
 
 interface AdminModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+const ADMIN_EMAILS = ["manassehlorlor@gmail.com"];
+
 export const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose }) => {
+  const { currentUser } = useAuth();
   const [activeTab, setActiveTab] = useState<"ai" | "templates" | "users" | "settings">("ai");
   const [temperature, setTemperature] = useState(0.7);
   const [maxTokens, setMaxTokens] = useState(1024);
@@ -15,6 +19,34 @@ export const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose }) => {
   );
 
   if (!isOpen) return null;
+
+  const isAdmin = currentUser?.email
+    ? ADMIN_EMAILS.includes(currentUser.email.toLowerCase()) || currentUser.email.toLowerCase().includes("admin")
+    : false;
+
+  if (!isAdmin) {
+    return (
+      <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl p-6 max-w-md w-full text-center space-y-4 shadow-2xl border border-slate-200">
+          <div className="w-12 h-12 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center mx-auto">
+            <Lock className="w-6 h-6" />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-slate-900">Access Denied</h3>
+            <p className="text-xs text-slate-500 mt-1">
+              System Admin privileges are restricted to authorized administrator accounts (<code className="bg-slate-100 px-1 py-0.5 rounded text-slate-800">manassehlorlor@gmail.com</code>).
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs rounded-xl transition cursor-pointer"
+          >
+            Close Window
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">

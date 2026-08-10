@@ -5,6 +5,10 @@ import { exportToPdf } from "./utils/pdfExporter";
 import { exportToJson, exportToPlainText, downloadBlob } from "./utils/exporter";
 import { useResumeStore } from "./store/useResumeStore";
 import { useUndoRedoShortcuts } from "./hooks/useUndoRedoShortcuts";
+import { useAuth } from "./context/AuthContext";
+import { AuthLandingPage } from "./components/auth/AuthLandingPage";
+import { CVMintLogo } from "./components/common/CVMintLogo";
+import { Loader2 } from "lucide-react";
 
 import { Navbar } from "./components/Navbar";
 import { WelcomeHero } from "./components/dashboard/WelcomeHero";
@@ -20,6 +24,10 @@ import { GhanaJobsWidget } from "./components/jobs/GhanaJobsWidget";
 import { ResumeRenderer } from "./components/templates/ResumeRenderer";
 
 export function App() {
+  // Auth state
+  const { currentUser, loading } = useAuth();
+  const [isGuest, setIsGuest] = useState<boolean>(false);
+
   // Activate global keyboard shortcuts for Undo (Ctrl+Z / Cmd+Z) and Redo (Ctrl+Y / Cmd+Shift+Z)
   useUndoRedoShortcuts();
 
@@ -147,6 +155,24 @@ export function App() {
     reader.readAsText(file);
   };
 
+  // Loading Spinner Screen during Auth state check
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col items-center justify-center p-4">
+        <CVMintLogo size="lg" />
+        <div className="flex items-center gap-2 mt-6 text-emerald-600 font-medium text-sm">
+          <Loader2 className="w-5 h-5 animate-spin text-emerald-600" />
+          <span>Initializing CvMinter...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Auth Gate: Require sign in or guest choice before showing main app page
+  if (!currentUser && !isGuest) {
+    return <AuthLandingPage onContinueAsGuest={() => setIsGuest(true)} />;
+  }
+
   return (
     <div className="min-h-screen bg-[#f3f4f6] text-slate-900 selection:bg-emerald-100 selection:text-emerald-900 w-full max-w-full overflow-x-hidden">
       {/* Navigation */}
@@ -229,6 +255,13 @@ export function App() {
           />
         )}
       </main>
+
+      {/* Main App Footer */}
+      <footer className="w-full bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500 mt-auto">
+        <div className="max-w-7xl mx-auto px-4">
+          <p>© 2026 CvMinter. Professional Resume & CV Builder. Built by MANATECH</p>
+        </div>
+      </footer>
 
       {/* Hidden offscreen printable container for PDF generation */}
       <div className="sr-only fixed top-0 left-0 w-0 h-0 overflow-hidden pointer-events-none opacity-0" aria-hidden="true">

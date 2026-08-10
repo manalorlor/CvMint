@@ -1,5 +1,5 @@
 {
-  "name": "CvMint",
+  "name": "CvMinter",
   "description": "Professional ATS-friendly CV & Resume Builder with 15+ templates, live customization, AI assistance, ATS scoring, and docx/PDF export.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
