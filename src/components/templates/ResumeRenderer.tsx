@@ -1,5 +1,6 @@
 import React from "react";
 import { ResumeData } from "../../types";
+import { useAuth } from "../../context/AuthContext";
 import {
   Mail,
   Phone,
@@ -34,6 +35,21 @@ export const ResumeRenderer: React.FC<ResumeRendererProps> = ({ resume, scale = 
     references,
     customization,
   } = resume;
+
+  const { currentUser } = useAuth();
+  const userDisplayName =
+    currentUser?.user_metadata?.display_name ||
+    currentUser?.user_metadata?.full_name ||
+    currentUser?.user_metadata?.name ||
+    currentUser?.displayName ||
+    "";
+
+  const rawCandidateName = [personalInfo?.firstName, personalInfo?.middleName, personalInfo?.lastName]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+
+  const candidateFullName = rawCandidateName || userDisplayName || "Your Full Name";
 
   const accentColor = customization?.accentColor || customization?.themeColor || "#2563eb";
   const fontColor = customization?.fontColor || "#0f172a";
@@ -323,7 +339,7 @@ export const ResumeRenderer: React.FC<ResumeRendererProps> = ({ resume, scale = 
             {/* Name & Title */}
             <div>
               <h1 className="text-xl font-extrabold tracking-tight" style={{ color: isDark ? "#ffffff" : headingColor }}>
-                {personalInfo.firstName} {personalInfo.lastName}
+                {candidateFullName}
               </h1>
               <p className="text-xs font-semibold mt-1" style={{ color: accentColor }}>
                 {personalInfo.jobTitle || resume.targetJobTitle}
@@ -413,7 +429,7 @@ export const ResumeRenderer: React.FC<ResumeRendererProps> = ({ resume, scale = 
       <div className="flex flex-col md:flex-row justify-between items-center md:items-start gap-4 pb-4 border-b border-gray-200" style={{ borderBottomColor: `${accentColor}40` }}>
         <div className="space-y-1 text-center md:text-left flex-1">
           <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight" style={{ color: headingColor }}>
-            {personalInfo.firstName} {personalInfo.middleName} {personalInfo.lastName}
+            {candidateFullName}
           </h1>
           <p className="text-sm font-bold uppercase tracking-wide" style={{ color: accentColor }}>
             {personalInfo.jobTitle || resume.targetJobTitle}

@@ -127,11 +127,24 @@ export async function signInWithEmail(email: string, pass: string): Promise<User
 export async function sendPasswordResetLink(email: string): Promise<void> {
   if (!isSupabaseConfigured) {
     throw new Error(
-      "Supabase is not configured yet. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY."
+      "Supabase is not configured yet. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment variables."
     );
   }
+  const redirectUrl = typeof window !== 'undefined' ? window.location.origin : '';
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}`,
+    redirectTo: redirectUrl,
+  });
+  if (error) throw error;
+}
+
+export async function updateUserPassword(newPassword: string): Promise<void> {
+  if (!isSupabaseConfigured) {
+    throw new Error(
+      "Supabase is not configured yet. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment variables."
+    );
+  }
+  const { error } = await supabase.auth.updateUser({
+    password: newPassword,
   });
   if (error) throw error;
 }

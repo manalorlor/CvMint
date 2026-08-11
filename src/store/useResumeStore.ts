@@ -24,7 +24,7 @@ interface ResumeStoreState {
   redo: () => void;
 
   // Collection CRUD
-  createNewResume: () => void;
+  createNewResume: (initialInfo?: Partial<ResumeData["personalInfo"]>) => void;
   duplicateResume: (id: string) => void;
   deleteResume: (id: string) => void;
   selectTemplate: (template: TemplateInfo) => void;
@@ -162,12 +162,17 @@ export const useResumeStore = create<ResumeStoreState>((set, get) => {
       });
     },
 
-    createNewResume: () => {
+    createNewResume: (initialInfo?: Partial<ResumeData["personalInfo"]>) => {
       const newId = "resume-" + Date.now();
+      const defaultInfo = {
+        ...DEFAULT_RESUME.personalInfo,
+        ...(initialInfo || {}),
+      };
       const newResume: ResumeData = {
         ...DEFAULT_RESUME,
         id: newId,
         title: `Resume - ${new Date().toLocaleDateString()}`,
+        personalInfo: defaultInfo,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };

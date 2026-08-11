@@ -27,6 +27,7 @@ export function App() {
   // Auth state
   const { currentUser, loading } = useAuth();
   const [isGuest, setIsGuest] = useState<boolean>(false);
+  const [authInitialMode, setAuthInitialMode] = useState<"login" | "register" | "forgot">("login");
 
   // Activate global keyboard shortcuts for Undo (Ctrl+Z / Cmd+Z) and Redo (Ctrl+Y / Cmd+Shift+Z)
   useUndoRedoShortcuts();
@@ -58,8 +59,31 @@ export function App() {
   const activeResume = getActiveResume();
 
   const handleCreateNew = () => {
-    createNewResume();
+    let userDefaults: Partial<ResumeData["personalInfo"]> = {};
+    if (currentUser) {
+      const rawName =
+        currentUser.user_metadata?.display_name ||
+        currentUser.user_metadata?.full_name ||
+        currentUser.displayName ||
+        "";
+      if (rawName) {
+        const nameParts = rawName.trim().split(" ");
+        const firstName = nameParts[0] || "";
+        const lastName = nameParts.slice(1).join(" ") || "";
+        userDefaults = {
+          firstName,
+          lastName,
+          email: currentUser.email || "",
+        };
+      }
+    }
+    createNewResume(userDefaults);
     setActiveTab("wizard");
+  };
+
+  const handleOpenSignUp = () => {
+    setAuthInitialMode("register");
+    setIsGuest(false);
   };
 
   const handleSelectTemplate = (template: TemplateInfo) => {
@@ -170,7 +194,7 @@ export function App() {
 
   // Auth Gate: Require sign in or guest choice before showing main app page
   if (!currentUser && !isGuest) {
-    return <AuthLandingPage onContinueAsGuest={() => setIsGuest(true)} />;
+    return <AuthLandingPage initialMode={authInitialMode} onContinueAsGuest={() => setIsGuest(true)} />;
   }
 
   return (
@@ -185,6 +209,7 @@ export function App() {
         onOpenGrammar={() => setIsGrammarOpen(true)}
         onOpenJobs={() => setActiveTab("jobs")}
         onOpenAdmin={() => setIsAdminOpen(true)}
+        onOpenSignUp={handleOpenSignUp}
         exportFormat={exportFormat}
         setExportFormat={setExportFormat}
         onPrint={() => handlePrint(activeResume)}

@@ -160,7 +160,7 @@ export const PrintPreviewModal: React.FC<PrintPreviewModalProps> = ({
                 <div className="flex justify-between py-1 border-b border-slate-100 text-slate-700">
                   <span>Candidate</span>
                   <span className="font-bold text-slate-900 truncate max-w-[140px]">
-                    {resume.personalInfo?.firstName || "Candidate"} {resume.personalInfo?.lastName || ""}
+                    {[resume.personalInfo?.firstName, resume.personalInfo?.lastName].filter(Boolean).join(" ") || "Your Full Name"}
                   </span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-slate-100 text-slate-700">

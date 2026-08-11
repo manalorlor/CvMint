@@ -28,6 +28,7 @@ interface NavbarProps {
   onOpenGrammar: () => void;
   onOpenJobs: () => void;
   onOpenAdmin: () => void;
+  onOpenSignUp?: () => void;
   exportFormat: "docx" | "pdf";
   setExportFormat: (format: "docx" | "pdf") => void;
   onPrint: () => void;
@@ -45,6 +46,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenTemplates,
   onOpenAts,
   onOpenAdmin,
+  onOpenSignUp,
   exportFormat,
   setExportFormat,
   onPrint,
@@ -295,7 +297,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
 
             {/* Firebase Auth & User Menu */}
-            <AuthUserMenu onOpenAdmin={onOpenAdmin} />
+            <AuthUserMenu onOpenAdmin={onOpenAdmin} onOpenSignUp={onOpenSignUp} />
           </div>
         </div>
       </nav>

@@ -17,16 +17,24 @@ import {
 
 interface AuthLandingPageProps {
   onContinueAsGuest?: () => void;
+  initialMode?: "login" | "register" | "forgot";
 }
 
-export const AuthLandingPage: React.FC<AuthLandingPageProps> = ({ onContinueAsGuest }) => {
+export const AuthLandingPage: React.FC<AuthLandingPageProps> = ({ onContinueAsGuest, initialMode = "login" }) => {
   const { registerWithEmail, loginWithEmail, recoverPassword, loading, isSyncing } = useAuth();
 
-  const [mode, setMode] = useState<"login" | "register" | "forgot">("login");
+  const [mode, setMode] = useState<"login" | "register" | "forgot">(initialMode);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [resetSuccessMessage, setResetSuccessMessage] = useState<string | null>(null);
   const [registerSuccessMessage, setRegisterSuccessMessage] = useState<string | null>(null);
+
+  // Synchronize mode if initialMode prop changes
+  React.useEffect(() => {
+    if (initialMode) {
+      setMode(initialMode);
+    }
+  }, [initialMode]);
 
   // Form Fields
   const [displayName, setDisplayName] = useState("");
@@ -47,7 +55,7 @@ export const AuthLandingPage: React.FC<AuthLandingPageProps> = ({ onContinueAsGu
     try {
       setIsAuthenticating(true);
       await recoverPassword(email.trim());
-      setResetSuccessMessage("Password reset email sent! Check your inbox for instructions.");
+      setResetSuccessMessage("Password reset email sent! Please check your inbox and Spam/Junk folder. Click the link in the email to set your new password.");
     } catch (err: any) {
       console.error("Password recovery error:", err);
       const code = err?.code || "";

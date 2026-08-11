@@ -15,19 +15,22 @@ import {
   Camera,
   Check,
   Upload,
+  UserPlus,
+  Lock,
 } from "lucide-react";
 
 interface AuthUserMenuProps {
   onOpenAdmin?: () => void;
+  onOpenSignUp?: () => void;
 }
 
-export const AuthUserMenu: React.FC<AuthUserMenuProps> = ({ onOpenAdmin }) => {
+export const AuthUserMenu: React.FC<AuthUserMenuProps> = ({ onOpenAdmin, onOpenSignUp }) => {
   const {
     currentUser,
-    loginWithGoogle,
     logoutUser,
     deleteAccount,
     recoverPassword,
+    updatePassword,
     updateProfile,
     isSyncing,
     lastSyncedAt,
@@ -40,6 +43,12 @@ export const AuthUserMenu: React.FC<AuthUserMenuProps> = ({ onOpenAdmin }) => {
   const [deleteConfirmStep, setDeleteConfirmStep] = useState(false);
   const [accountError, setAccountError] = useState<string | null>(null);
   const [resetMessage, setResetMessage] = useState<string | null>(null);
+
+  // Password Change State in Account Settings
+  const [changePassNew, setChangePassNew] = useState("");
+  const [changePassConfirm, setChangePassConfirm] = useState("");
+  const [isChangingPass, setIsChangingPass] = useState(false);
+  const [passChangeSuccess, setPassChangeSuccess] = useState<string | null>(null);
 
   // User Profile Form States
   const [editDisplayName, setEditDisplayName] = useState("");
@@ -79,13 +88,13 @@ export const AuthUserMenu: React.FC<AuthUserMenuProps> = ({ onOpenAdmin }) => {
   if (!currentUser) {
     return (
       <button
-        onClick={loginWithGoogle}
-        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-white text-emerald-700 hover:bg-emerald-50 rounded-lg border border-emerald-200 shadow-2xs transition flex-shrink-0 cursor-pointer"
-        title="Sign in with Google to sync your CVs to Cloud Storage"
+        type="button"
+        onClick={onOpenSignUp}
+        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg shadow-2xs transition flex-shrink-0 cursor-pointer"
+        title="Create a free account to save and sync your CVs"
       >
-        <LogIn className="w-3.5 h-3.5 text-emerald-600" />
-        <span className="hidden sm:inline">Sign In / Sync</span>
-        <span className="sm:hidden">Sign In</span>
+        <UserPlus className="w-3.5 h-3.5 text-white" />
+        <span>Sign Up</span>
       </button>
     );
   }
@@ -145,9 +154,41 @@ export const AuthUserMenu: React.FC<AuthUserMenuProps> = ({ onOpenAdmin }) => {
       setResetMessage(null);
       setAccountError(null);
       await recoverPassword(currentUser.email);
-      setResetMessage("Password reset email sent to your address! Check your inbox.");
+      setResetMessage("Password reset email sent to " + currentUser.email + "! Please check your inbox and Spam/Junk folder.");
     } catch (err: any) {
       setAccountError("Failed to send reset email: " + (err?.message || "Unknown error"));
+    }
+  };
+
+  const handleChangePasswordDirect = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAccountError(null);
+    setPassChangeSuccess(null);
+
+    if (!changePassNew.trim()) {
+      setAccountError("Please enter a new password.");
+      return;
+    }
+    if (changePassNew.length < 6) {
+      setAccountError("Password must be at least 6 characters long.");
+      return;
+    }
+    if (changePassNew !== changePassConfirm) {
+      setAccountError("Passwords do not match. Please verify.");
+      return;
+    }
+
+    try {
+      setIsChangingPass(true);
+      await updatePassword(changePassNew);
+      setPassChangeSuccess("Password updated successfully!");
+      setChangePassNew("");
+      setChangePassConfirm("");
+    } catch (err: any) {
+      console.error("Change password error:", err);
+      setAccountError(err?.message || "Failed to update password.");
+    } finally {
+      setIsChangingPass(false);
     }
   };
 
@@ -453,32 +494,87 @@ export const AuthUserMenu: React.FC<AuthUserMenuProps> = ({ onOpenAdmin }) => {
               </button>
             </form>
 
-            {/* Account Actions: Sign Out & Reset Password */}
-            <div className="pt-2 border-t border-slate-100 space-y-2">
-              <div className="flex flex-col sm:flex-row gap-2">
-                {currentUser.email && (
-                  <button
-                    type="button"
-                    onClick={handleSendResetEmail}
-                    className="flex-1 py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 border border-slate-200 cursor-pointer"
-                  >
-                    <Key className="w-4 h-4 text-slate-600" />
-                    <span>Reset Password</span>
-                  </button>
-                )}
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    logoutUser();
-                    setShowAccountModal(false);
-                  }}
-                  className="flex-1 py-2.5 px-3 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
-                >
-                  <LogOut className="w-4 h-4 text-slate-300" />
-                  <span>Sign Out of Account</span>
-                </button>
+            {/* Direct Password Change Section */}
+            <div className="pt-3 border-t border-slate-100 space-y-3">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800">
+                <Lock className="w-4 h-4 text-emerald-600" />
+                <span>Security & Password Settings</span>
               </div>
+
+              {passChangeSuccess && (
+                <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-semibold flex items-center gap-2">
+                  <Check className="w-4 h-4 text-emerald-600" />
+                  <span>{passChangeSuccess}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleChangePasswordDirect} className="space-y-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-600 mb-1">New Password</label>
+                    <input
+                      type="password"
+                      value={changePassNew}
+                      onChange={(e) => setChangePassNew(e.target.value)}
+                      placeholder="At least 6 characters"
+                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-emerald-600 shadow-2xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-600 mb-1">Confirm New Password</label>
+                    <input
+                      type="password"
+                      value={changePassConfirm}
+                      onChange={(e) => setChangePassConfirm(e.target.value)}
+                      placeholder="Confirm new password"
+                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-emerald-600 shadow-2xs"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                  <button
+                    type="submit"
+                    disabled={isChangingPass}
+                    className="py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                  >
+                    {isChangingPass ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Updating Password...</span>
+                      </>
+                    ) : (
+                      <span>Update Password</span>
+                    )}
+                  </button>
+
+                  {currentUser.email && (
+                    <button
+                      type="button"
+                      onClick={handleSendResetEmail}
+                      className="py-2 px-3 bg-white hover:bg-slate-100 text-slate-700 rounded-xl font-bold text-xs transition border border-slate-200 flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <Key className="w-3.5 h-3.5 text-slate-500" />
+                      <span>Send Reset Email Link</span>
+                    </button>
+                  )}
+                </div>
+              </form>
+            </div>
+
+            {/* Sign Out Action */}
+            <div className="pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => {
+                  logoutUser();
+                  setShowAccountModal(false);
+                }}
+                className="w-full py-2.5 px-3 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+              >
+                <LogOut className="w-4 h-4 text-slate-300" />
+                <span>Sign Out of Account</span>
+              </button>
             </div>
 
             {/* Danger Zone / Account & Database Deletion */}
