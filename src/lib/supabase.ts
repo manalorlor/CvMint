@@ -71,6 +71,42 @@ export async function signUpWithEmail(
       console.warn('Could not create profile record:', e);
     }
   }
+
+  // Explicitly sign out so the user is directed to sign in with credentials after confirming
+  await supabase.auth.signOut();
+  return data.user;
+}
+
+export async function updateUserProfile(
+  displayName: string,
+  avatarUrl?: string
+): Promise<User | null> {
+  if (!isSupabaseConfigured) return null;
+  const updates: Record<string, any> = {
+    display_name: displayName,
+  };
+  if (avatarUrl !== undefined) {
+    updates.avatar_url = avatarUrl;
+  }
+
+  const { data, error } = await supabase.auth.updateUser({
+    data: updates,
+  });
+  if (error) throw error;
+
+  if (data.user) {
+    try {
+      await supabase.from('profiles').upsert({
+        id: data.user.id,
+        email: data.user.email,
+        display_name: displayName,
+        avatar_url: avatarUrl || data.user.user_metadata?.avatar_url || '',
+        updated_at: new Date().toISOString(),
+      });
+    } catch (e) {
+      console.warn('Could not update profile record:', e);
+    }
+  }
   return data.user;
 }
 

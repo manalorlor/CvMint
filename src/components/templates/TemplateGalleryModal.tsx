@@ -40,7 +40,7 @@ export const TemplateGalleryModal: React.FC<TemplateGalleryModalProps> = ({
                 CV Templates Gallery
               </h2>
               <span className="px-2.5 py-0.5 bg-yellow-400 text-slate-950 font-black text-[10px] rounded-full uppercase tracking-wide">
-                Coming Soon 🚀
+                Coming Soon
               </span>
             </div>
             <p className="text-xs text-slate-300">

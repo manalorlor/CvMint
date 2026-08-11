@@ -183,7 +183,7 @@ export const CareerStageSelectorModal: React.FC<CareerStageSelectorModalProps> =
         {/* Modal Footer */}
         <div className="p-4 sm:p-5 bg-white border-t border-slate-200 flex flex-wrap justify-between items-center gap-3">
           <div className="text-xs text-slate-500 font-medium">
-            💡 You can change your career stage anytime in the Wizard.
+            You can change your career stage anytime in the Wizard.
           </div>
 
           {onClose && (

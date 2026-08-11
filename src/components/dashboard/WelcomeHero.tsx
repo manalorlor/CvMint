@@ -48,9 +48,9 @@ export const WelcomeHero: React.FC<WelcomeHeroProps> = ({ onCreateClick, onTempl
           {onJobsClick && (
             <button
               onClick={onJobsClick}
-              className="flex items-center gap-2 px-6 py-3.5 text-sm font-bold text-slate-900 bg-amber-400 hover:bg-amber-500 rounded-2xl shadow-sm transition"
+              className="flex items-center gap-2 px-6 py-3.5 text-sm font-bold text-slate-900 bg-amber-400 hover:bg-amber-500 rounded-2xl shadow-sm transition cursor-pointer"
             >
-              <span>🇬🇭</span> Ghana Vacancies
+              Ghana Vacancies
             </button>
           )}
         </div>

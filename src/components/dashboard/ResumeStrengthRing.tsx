@@ -279,7 +279,7 @@ export const ResumeStrengthRing: React.FC<ResumeStrengthRingProps> = ({
                   <div className="flex flex-wrap gap-1">
                     {result.details.weakVerbsFound.map((weak) => (
                       <span key={weak} className="px-2 py-0.5 bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 rounded text-[11px] font-bold">
-                        ❌ "{weak}"
+                        "{weak}"
                       </span>
                     ))}
                   </div>
@@ -299,7 +299,7 @@ export const ResumeStrengthRing: React.FC<ResumeStrengthRingProps> = ({
                   <div className="flex flex-wrap gap-1">
                     {result.details.missingSections.map((sec) => (
                       <span key={sec} className="px-2 py-0.5 bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 rounded text-[11px] font-medium">
-                        ⚠️ {sec}
+                        {sec}
                       </span>
                     ))}
                   </div>

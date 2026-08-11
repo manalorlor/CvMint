@@ -20,6 +20,7 @@ import {
   ListOrdered,
   Sparkles,
   BookOpen,
+  Eraser,
 } from "lucide-react";
 
 import { PersonalInfoStep } from "./PersonalInfoStep";
@@ -130,6 +131,49 @@ export const WizardContainer: React.FC<WizardContainerProps> = ({ resume, onChan
       },
     });
     setStageModalOpen(false);
+  };
+
+  const handleClearAllFields = () => {
+    if (window.confirm("Clear all fields and sample content to enter your details from scratch?")) {
+      onChange({
+        ...resume,
+        title: "My Resume",
+        targetJobTitle: "",
+        fieldOfStudy: "",
+        yearsOfExperience: 0,
+        personalInfo: {
+          firstName: "",
+          middleName: "",
+          lastName: "",
+          gender: "",
+          dateOfBirth: "",
+          nationality: "",
+          address: "",
+          digitalAddress: "",
+          region: "",
+          district: "",
+          phoneNumber: "",
+          altPhoneNumber: "",
+          email: "",
+          linkedin: "",
+          portfolio: "",
+          website: "",
+          github: "",
+          jobTitle: "",
+        },
+        education: [],
+        workExperience: [],
+        skills: [],
+        certifications: [],
+        projects: [],
+        professionalSummary: "",
+        careerObjective: "",
+        references: {
+          type: "available_upon_request",
+        },
+        updatedAt: new Date().toISOString(),
+      });
+    }
   };
 
   const renderActiveStepContent = () => {
@@ -291,15 +335,24 @@ export const WizardContainer: React.FC<WizardContainerProps> = ({ resume, onChan
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <UndoRedoControls size="md" />
 
               <button
                 type="button"
                 onClick={() => setPresetModalOpen(true)}
-                className="flex items-center gap-1.5 text-xs font-bold px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl border border-slate-200 transition"
+                className="flex items-center gap-1.5 text-xs font-bold px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl border border-slate-200 transition cursor-pointer"
               >
                 <Wand2 className="w-3.5 h-3.5 text-slate-600" /> Role Preset
+              </button>
+
+              <button
+                type="button"
+                onClick={handleClearAllFields}
+                className="flex items-center gap-1.5 text-xs font-bold px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl border border-rose-200/80 transition cursor-pointer"
+                title="Clear all fields to enter your own information from scratch"
+              >
+                <Eraser className="w-3.5 h-3.5 text-rose-600" /> Clear Content
               </button>
             </div>
           </div>

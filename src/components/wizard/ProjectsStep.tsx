@@ -43,7 +43,7 @@ export const ProjectsStep: React.FC<StepProps> = ({ resume, onChange }) => {
       {(resume.careerStage === "student" || resume.careerStage === "recent_graduate") && (
         <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-start gap-3">
           <div className="p-2 bg-emerald-600 text-white rounded-xl font-bold text-xs flex-shrink-0">
-            🚀 Crucial for Students
+            Crucial for Students
           </div>
           <div className="space-y-1 text-xs text-emerald-950">
             <h4 className="font-extrabold uppercase tracking-wide">Academic & Class Projects Replace Job Experience</h4>

@@ -6,6 +6,7 @@ import {
   signUpWithEmail,
   signInWithEmail,
   sendPasswordResetLink,
+  updateUserProfile,
   deleteAccountAndData,
   logOut,
   fetchUserResumesFromSupabase,
@@ -21,6 +22,7 @@ interface AuthContextType {
   registerWithEmail: (email: string, pass: string, name: string) => Promise<void>;
   loginWithEmail: (email: string, pass: string) => Promise<void>;
   recoverPassword: (email: string) => Promise<void>;
+  updateProfile: (displayName: string, avatarUrl?: string) => Promise<void>;
   deleteAccount: () => Promise<void>;
   logoutUser: () => Promise<void>;
   syncCloudResumes: () => Promise<void>;
@@ -145,6 +147,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await sendPasswordResetLink(email);
   };
 
+  const updateProfile = async (displayName: string, avatarUrl?: string) => {
+    if (!currentUser) return;
+    try {
+      setIsSyncing(true);
+      const updatedUser = await updateUserProfile(displayName, avatarUrl);
+      if (updatedUser) {
+        setCurrentUser(updatedUser);
+      }
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   const deleteAccount = async () => {
     if (!currentUser) return;
     try {
@@ -189,6 +204,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         registerWithEmail,
         loginWithEmail,
         recoverPassword,
+        updateProfile,
         deleteAccount,
         logoutUser,
         syncCloudResumes,

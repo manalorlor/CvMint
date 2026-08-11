@@ -15,7 +15,7 @@ export const CertificationsStep: React.FC<StepProps> = ({ resume, onChange }) =>
       id: "cert-" + Date.now(),
       certificationName: "",
       institution: "",
-      issueDate: "2023-01",
+      issueDate: "",
     };
     onChange({
       ...resume,

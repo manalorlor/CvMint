@@ -26,6 +26,7 @@ export const AuthLandingPage: React.FC<AuthLandingPageProps> = ({ onContinueAsGu
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [resetSuccessMessage, setResetSuccessMessage] = useState<string | null>(null);
+  const [registerSuccessMessage, setRegisterSuccessMessage] = useState<string | null>(null);
 
   // Form Fields
   const [displayName, setDisplayName] = useState("");
@@ -89,6 +90,10 @@ export const AuthLandingPage: React.FC<AuthLandingPageProps> = ({ onContinueAsGu
       setIsAuthenticating(true);
       if (mode === "register") {
         await registerWithEmail(email.trim(), password, displayName.trim());
+        setRegisterSuccessMessage("Account created successfully! Please check your email inbox to confirm your address if required, then enter your password below to sign in.");
+        setMode("login");
+        setPassword("");
+        setConfirmPassword("");
       } else {
         await loginWithEmail(email.trim(), password);
       }
@@ -199,6 +204,7 @@ export const AuthLandingPage: React.FC<AuthLandingPageProps> = ({ onContinueAsGu
                   setMode("login");
                   setAuthError(null);
                   setResetSuccessMessage(null);
+                  setRegisterSuccessMessage(null);
                 }}
                 className={`flex-1 py-1.5 text-xs rounded-lg transition flex items-center justify-center gap-1.5 cursor-pointer ${
                   mode === "login"
@@ -215,6 +221,7 @@ export const AuthLandingPage: React.FC<AuthLandingPageProps> = ({ onContinueAsGu
                   setMode("register");
                   setAuthError(null);
                   setResetSuccessMessage(null);
+                  setRegisterSuccessMessage(null);
                 }}
                 className={`flex-1 py-1.5 text-xs rounded-lg transition flex items-center justify-center gap-1.5 cursor-pointer ${
                   mode === "register"
@@ -234,6 +241,7 @@ export const AuthLandingPage: React.FC<AuthLandingPageProps> = ({ onContinueAsGu
                   setMode("login");
                   setAuthError(null);
                   setResetSuccessMessage(null);
+                  setRegisterSuccessMessage(null);
                 }}
                 className="text-xs font-semibold text-emerald-700 hover:text-emerald-800 transition flex items-center gap-1 cursor-pointer"
               >
@@ -259,6 +267,16 @@ export const AuthLandingPage: React.FC<AuthLandingPageProps> = ({ onContinueAsGu
                 : "We will send a password reset link to your email"}
             </p>
           </div>
+
+          {registerSuccessMessage && (
+            <div className="mb-4 p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-medium leading-relaxed flex items-start gap-2.5">
+              <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <span className="font-bold block text-emerald-950 mb-0.5">Registration Successful!</span>
+                <span>{registerSuccessMessage}</span>
+              </div>
+            </div>
+          )}
 
           {authError && (
             <div className="mb-4 p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-medium leading-relaxed whitespace-pre-line">

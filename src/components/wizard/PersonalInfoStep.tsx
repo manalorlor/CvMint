@@ -326,10 +326,17 @@ export const PersonalInfoStep: React.FC<StepProps> = ({ resume, onChange }) => {
           <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-tighter mb-1">Target Job Title *</label>
           <input
             type="text"
-            value={p.jobTitle || resume.targetJobTitle || ""}
+            value={p.jobTitle !== undefined ? p.jobTitle : (resume.targetJobTitle || "")}
             onChange={(e) => {
-              handleInfoChange("jobTitle", e.target.value);
-              onChange({ ...resume, targetJobTitle: e.target.value, personalInfo: { ...p, jobTitle: e.target.value } });
+              const val = e.target.value;
+              onChange({
+                ...resume,
+                targetJobTitle: val,
+                personalInfo: {
+                  ...p,
+                  jobTitle: val,
+                },
+              });
             }}
             className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none bg-white text-slate-900"
             placeholder="e.g., Senior Software Developer / Data Analyst"
@@ -502,13 +509,20 @@ export const PersonalInfoStep: React.FC<StepProps> = ({ resume, onChange }) => {
           <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-tighter mb-1">Portfolio / Website</label>
           <input
             type="text"
-            value={p.portfolio || p.website || ""}
+            value={p.portfolio !== undefined ? p.portfolio : (p.website || "")}
             onChange={(e) => {
-              handleInfoChange("portfolio", e.target.value);
-              handleInfoChange("website", e.target.value);
+              const val = e.target.value;
+              onChange({
+                ...resume,
+                personalInfo: {
+                  ...resume.personalInfo,
+                  portfolio: val,
+                  website: val,
+                },
+              });
             }}
             className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none bg-white text-slate-900"
-            placeholder="kwamemensah.dev"
+            placeholder="e.g. kwamemensah.dev or myportfolio.com"
           />
         </div>
       </div>

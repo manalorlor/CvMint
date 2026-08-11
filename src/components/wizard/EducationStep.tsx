@@ -17,9 +17,9 @@ export const EducationStep: React.FC<StepProps> = ({ resume, onChange }) => {
       institutionName: "",
       country: "",
       fieldOfStudy: "",
-      degree: "Bachelor of Science",
-      startYear: "2020",
-      completionYear: "2024",
+      degree: "",
+      startYear: "",
+      completionYear: "",
       isCurrentStudent: false,
     };
     onChange({
@@ -50,7 +50,7 @@ export const EducationStep: React.FC<StepProps> = ({ resume, onChange }) => {
       {(resume.careerStage === "student" || resume.careerStage === "recent_graduate") && (
         <div className="p-4 bg-blue-50 border border-blue-200 rounded-2xl flex items-start gap-3">
           <div className="p-2 bg-blue-600 text-white rounded-xl font-bold text-xs flex-shrink-0">
-            🎓 Student Priority
+            Student Priority
           </div>
           <div className="space-y-1 text-xs text-blue-950">
             <h4 className="font-extrabold uppercase tracking-wide">Education Is Your #1 Asset</h4>
@@ -142,7 +142,7 @@ export const EducationStep: React.FC<StepProps> = ({ resume, onChange }) => {
                     >
                       <option value="custom">-- Choose from Ghanaian Universities List --</option>
                       
-                      <optgroup label="🏛️ Public Universities">
+                      <optgroup label="Public Universities">
                         {GHANAIAN_UNIVERSITIES.filter((u) => u.category === "Public").map((uni) => (
                           <option key={uni.name} value={uni.name}>
                             {uni.name} ({uni.location})
@@ -150,7 +150,7 @@ export const EducationStep: React.FC<StepProps> = ({ resume, onChange }) => {
                         ))}
                       </optgroup>
 
-                      <optgroup label="⚙️ Technical Universities">
+                      <optgroup label="Technical Universities">
                         {GHANAIAN_UNIVERSITIES.filter((u) => u.category === "Technical").map((uni) => (
                           <option key={uni.name} value={uni.name}>
                             {uni.name} ({uni.location})
@@ -158,7 +158,7 @@ export const EducationStep: React.FC<StepProps> = ({ resume, onChange }) => {
                         ))}
                       </optgroup>
 
-                      <optgroup label="🎓 Private Universities">
+                      <optgroup label="Private Universities">
                         {GHANAIAN_UNIVERSITIES.filter((u) => u.category === "Private").map((uni) => (
                           <option key={uni.name} value={uni.name}>
                             {uni.name} ({uni.location})
@@ -166,7 +166,7 @@ export const EducationStep: React.FC<StepProps> = ({ resume, onChange }) => {
                         ))}
                       </optgroup>
 
-                      <optgroup label="🏥 Colleges of Education & Health">
+                      <optgroup label="Colleges of Education & Health">
                         {GHANAIAN_UNIVERSITIES.filter((u) => u.category === "College").map((uni) => (
                           <option key={uni.name} value={uni.name}>
                             {uni.name} ({uni.location})

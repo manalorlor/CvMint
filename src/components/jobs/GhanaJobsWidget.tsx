@@ -385,7 +385,7 @@ export const GhanaJobsWidget: React.FC<GhanaJobsWidgetProps> = ({
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 rounded-full text-xs font-bold mb-3">
-              <Globe className="w-3.5 h-3.5 text-yellow-400 animate-spin-slow" /> Live Google Search Grounded Jobs • Ghana 🇬🇭
+              <Globe className="w-3.5 h-3.5 text-yellow-400 animate-spin-slow" /> Live Google Search Grounded Jobs • Ghana
             </div>
             <h2 className="text-2xl font-black tracking-tight text-white flex items-center gap-2">
               Current Job Vacancies in Ghana
@@ -574,9 +574,9 @@ export const GhanaJobsWidget: React.FC<GhanaJobsWidgetProps> = ({
                     onChange={(e) => setSortBy(e.target.value as any)}
                     className="w-full px-2.5 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-emerald-500"
                   >
-                    <option value="newest">🕒 Date Posted (Newest First)</option>
-                    <option value="oldest">⌛ Date Posted (Oldest First)</option>
-                    <option value="relevance">⭐ Search Relevance</option>
+                    <option value="newest">Date Posted (Newest First)</option>
+                    <option value="oldest">Date Posted (Oldest First)</option>
+                    <option value="relevance">Search Relevance</option>
                   </select>
                 </div>
 

@@ -17,11 +17,11 @@ export const ExperienceStep: React.FC<StepProps> = ({ resume, onChange }) => {
       companyName: "",
       position: "",
       location: "",
-      startDate: "2022-01",
-      endDate: "2024-01",
+      startDate: "",
+      endDate: "",
       isCurrentJob: false,
       responsibilities: [
-        "Led key initiatives resulting in measurable performance improvement.",
+        "",
       ],
       achievements: "",
     };
@@ -123,7 +123,7 @@ export const ExperienceStep: React.FC<StepProps> = ({ resume, onChange }) => {
       {resume.careerStage === "student" && (
         <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-3">
           <div className="p-2 bg-amber-500 text-slate-950 rounded-xl font-black text-xs flex-shrink-0">
-            💡 No Job History?
+            No Job History?
           </div>
           <div className="space-y-1 text-xs text-slate-800">
             <h4 className="font-extrabold uppercase tracking-wide text-amber-950">Don't Worry — This Step Is Optional For Students!</h4>
@@ -137,7 +137,7 @@ export const ExperienceStep: React.FC<StepProps> = ({ resume, onChange }) => {
       {resume.careerStage === "recent_graduate" && (
         <div className="p-4 bg-purple-50 border border-purple-200 rounded-2xl flex items-start gap-3">
           <div className="p-2 bg-purple-600 text-white rounded-xl font-bold text-xs flex-shrink-0">
-            🇬🇭 NSS & Internships Tip
+            NSS & Internships Tip
           </div>
           <div className="space-y-1 text-xs text-purple-950">
             <h4 className="font-extrabold uppercase tracking-wide">Include National Service (NSS) & Industrial Attachments</h4>

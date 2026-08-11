@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import {
   LogIn,
@@ -12,6 +12,9 @@ import {
   X,
   Key,
   Settings,
+  Camera,
+  Check,
+  Upload,
 } from "lucide-react";
 
 interface AuthUserMenuProps {
@@ -25,6 +28,7 @@ export const AuthUserMenu: React.FC<AuthUserMenuProps> = ({ onOpenAdmin }) => {
     logoutUser,
     deleteAccount,
     recoverPassword,
+    updateProfile,
     isSyncing,
     lastSyncedAt,
     syncCloudResumes,
@@ -36,6 +40,41 @@ export const AuthUserMenu: React.FC<AuthUserMenuProps> = ({ onOpenAdmin }) => {
   const [deleteConfirmStep, setDeleteConfirmStep] = useState(false);
   const [accountError, setAccountError] = useState<string | null>(null);
   const [resetMessage, setResetMessage] = useState<string | null>(null);
+
+  // User Profile Form States
+  const [editDisplayName, setEditDisplayName] = useState("");
+  const [editAvatarUrl, setEditAvatarUrl] = useState("");
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [profileSaveSuccess, setProfileSaveSuccess] = useState<string | null>(null);
+
+  const getDisplayName = () => {
+    if (!currentUser) return "User";
+    return (
+      currentUser.user_metadata?.display_name ||
+      currentUser.user_metadata?.full_name ||
+      currentUser.user_metadata?.name ||
+      currentUser.displayName ||
+      currentUser.email?.split("@")[0] ||
+      "User"
+    );
+  };
+
+  const getAvatarUrl = () => {
+    if (!currentUser) return "";
+    return (
+      currentUser.user_metadata?.avatar_url ||
+      currentUser.user_metadata?.picture ||
+      currentUser.photoURL ||
+      ""
+    );
+  };
+
+  useEffect(() => {
+    if (currentUser) {
+      setEditDisplayName(getDisplayName());
+      setEditAvatarUrl(getAvatarUrl());
+    }
+  }, [currentUser, showAccountModal]);
 
   if (!currentUser) {
     return (
@@ -51,10 +90,54 @@ export const AuthUserMenu: React.FC<AuthUserMenuProps> = ({ onOpenAdmin }) => {
     );
   }
 
+  const displayName = getDisplayName();
+  const avatarUrl = getAvatarUrl();
+
   const ADMIN_EMAILS = ["manassehlorlor@gmail.com"];
   const isAdminUser = currentUser?.email
     ? ADMIN_EMAILS.includes(currentUser.email.toLowerCase()) || currentUser.email.toLowerCase().includes("admin")
     : false;
+
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 3 * 1024 * 1024) {
+        setAccountError("Image file size must be smaller than 3MB.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const result = event.target?.result as string;
+        if (result) {
+          setEditAvatarUrl(result);
+          setAccountError(null);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAccountError(null);
+    setProfileSaveSuccess(null);
+
+    if (!editDisplayName.trim()) {
+      setAccountError("Display Name cannot be empty.");
+      return;
+    }
+
+    try {
+      setIsSavingProfile(true);
+      await updateProfile(editDisplayName.trim(), editAvatarUrl);
+      setProfileSaveSuccess("Profile updated successfully!");
+    } catch (err: any) {
+      console.error("Profile update error:", err);
+      setAccountError(err?.message || "Failed to update profile. Please try again.");
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
 
   const handleSendResetEmail = async () => {
     if (!currentUser.email) return;
@@ -62,7 +145,7 @@ export const AuthUserMenu: React.FC<AuthUserMenuProps> = ({ onOpenAdmin }) => {
       setResetMessage(null);
       setAccountError(null);
       await recoverPassword(currentUser.email);
-      setResetMessage("Password reset email sent to your address!");
+      setResetMessage("Password reset email sent to your address! Check your inbox.");
     } catch (err: any) {
       setAccountError("Failed to send reset email: " + (err?.message || "Unknown error"));
     }
@@ -92,21 +175,21 @@ export const AuthUserMenu: React.FC<AuthUserMenuProps> = ({ onOpenAdmin }) => {
         onClick={() => setDropdownOpen(!dropdownOpen)}
         className="flex items-center gap-2 p-1 pl-2 pr-2.5 bg-slate-100 hover:bg-slate-200/80 rounded-xl border border-slate-200 transition cursor-pointer"
       >
-        {currentUser.photoURL ? (
+        {avatarUrl ? (
           <img
-            src={currentUser.photoURL}
-            alt={currentUser.displayName || "User"}
+            src={avatarUrl}
+            alt={displayName}
             className="w-6 h-6 rounded-full object-cover border border-emerald-500/30 flex-shrink-0"
             referrerPolicy="no-referrer"
           />
         ) : (
           <div className="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
-            {currentUser.displayName?.[0] || currentUser.email?.[0] || "U"}
+            {displayName?.[0]?.toUpperCase() || "U"}
           </div>
         )}
 
         <span className="hidden md:inline text-xs font-bold text-slate-800 max-w-[100px] truncate">
-          {currentUser.displayName || currentUser.email?.split("@")[0]}
+          {displayName}
         </span>
 
         {isSyncing ? (
@@ -124,21 +207,21 @@ export const AuthUserMenu: React.FC<AuthUserMenuProps> = ({ onOpenAdmin }) => {
           />
           <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-200 py-3 z-50 text-xs text-slate-700 space-y-2">
             <div className="px-4 pb-2 border-b border-slate-100 flex items-center gap-3">
-              {currentUser.photoURL ? (
+              {avatarUrl ? (
                 <img
-                  src={currentUser.photoURL}
-                  alt={currentUser.displayName || "User"}
+                  src={avatarUrl}
+                  alt={displayName}
                   className="w-9 h-9 rounded-full object-cover border border-emerald-500/40"
                   referrerPolicy="no-referrer"
                 />
               ) : (
                 <div className="w-9 h-9 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm">
-                  {currentUser.displayName?.[0] || "U"}
+                  {displayName?.[0]?.toUpperCase() || "U"}
                 </div>
               )}
               <div className="flex flex-col min-w-0">
                 <span className="font-bold text-slate-900 truncate">
-                  {currentUser.displayName || "User Account"}
+                  {displayName}
                 </span>
                 <span className="text-[11px] text-slate-500 truncate">
                   {currentUser.email}
@@ -185,11 +268,12 @@ export const AuthUserMenu: React.FC<AuthUserMenuProps> = ({ onOpenAdmin }) => {
                 setDeleteConfirmStep(false);
                 setAccountError(null);
                 setResetMessage(null);
+                setProfileSaveSuccess(null);
               }}
               className="w-full text-left px-4 py-2 hover:bg-slate-50 font-bold text-slate-700 flex items-center gap-2 transition cursor-pointer"
             >
               <UserIcon className="w-4 h-4 text-slate-600" />
-              <span>Account Settings</span>
+              <span>User Profile & Settings</span>
             </button>
 
             {onOpenAdmin && isAdminUser && (
@@ -221,13 +305,13 @@ export const AuthUserMenu: React.FC<AuthUserMenuProps> = ({ onOpenAdmin }) => {
         </>
       )}
 
-      {/* Account Settings & Deletion Modal */}
+      {/* Account Settings & User Profile Modal */}
       {showAccountModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 relative text-slate-800 space-y-5">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-200 relative text-slate-800 space-y-5 max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setShowAccountModal(false)}
-              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition"
+              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -237,8 +321,8 @@ export const AuthUserMenu: React.FC<AuthUserMenuProps> = ({ onOpenAdmin }) => {
                 <UserIcon className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-slate-900">Account Settings</h3>
-                <p className="text-xs text-slate-500">Manage profile & account preferences</p>
+                <h3 className="text-lg font-bold text-slate-900">User Profile</h3>
+                <p className="text-xs text-slate-500">Update photo, username, and account details</p>
               </div>
             </div>
 
@@ -248,30 +332,130 @@ export const AuthUserMenu: React.FC<AuthUserMenuProps> = ({ onOpenAdmin }) => {
               </div>
             )}
 
+            {profileSaveSuccess && (
+              <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl text-xs font-semibold flex items-center gap-2">
+                <Check className="w-4 h-4 text-emerald-600" />
+                <span>{profileSaveSuccess}</span>
+              </div>
+            )}
+
             {resetMessage && (
               <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl text-xs font-medium leading-relaxed">
                 {resetMessage}
               </div>
             )}
 
-            <div className="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-100 text-xs">
-              <div className="flex justify-between py-1 border-b border-slate-200/60">
-                <span className="font-semibold text-slate-500">Display Name</span>
-                <span className="font-bold text-slate-800">{currentUser.displayName || "User"}</span>
+            {/* Profile Edit Form */}
+            <form onSubmit={handleSaveProfile} className="space-y-4">
+              {/* Profile Avatar Selection & Upload */}
+              <div className="flex flex-col sm:flex-row items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-200/80">
+                <div className="relative group">
+                  {editAvatarUrl ? (
+                    <img
+                      src={editAvatarUrl}
+                      alt="Avatar Preview"
+                      className="w-16 h-16 rounded-full object-cover border-2 border-emerald-500 shadow-xs"
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xl shadow-xs">
+                      {editDisplayName?.[0]?.toUpperCase() || "U"}
+                    </div>
+                  )}
+
+                  <label className="absolute bottom-0 right-0 p-1.5 bg-slate-900 text-white rounded-full cursor-pointer hover:bg-emerald-600 transition shadow-md">
+                    <Camera className="w-3.5 h-3.5" />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageFileChange}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+
+                <div className="flex-1 space-y-1.5 text-center sm:text-left w-full">
+                  <label className="block text-xs font-bold text-slate-800">
+                    Profile Picture
+                  </label>
+                  <p className="text-[11px] text-slate-500">
+                    Upload a JPEG or PNG image (max 3MB), or paste a photo URL below.
+                  </p>
+                  <div className="flex gap-2 pt-1">
+                    <label className="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-xs font-semibold transition inline-flex items-center gap-1.5 cursor-pointer shadow-2xs">
+                      <Upload className="w-3.5 h-3.5 text-slate-500" />
+                      <span>Upload Photo</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageFileChange}
+                        className="hidden"
+                      />
+                    </label>
+
+                    {editAvatarUrl && (
+                      <button
+                        type="button"
+                        onClick={() => setEditAvatarUrl("")}
+                        className="px-2.5 py-1.5 text-rose-600 hover:bg-rose-50 rounded-xl text-xs font-semibold transition cursor-pointer"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
-              <div className="flex justify-between py-1 border-b border-slate-200/60">
-                <span className="font-semibold text-slate-500">Email Address</span>
-                <span className="font-bold text-slate-800">{currentUser.email || "N/A"}</span>
+
+              {/* Display Name Input */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Full Name / Username
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editDisplayName}
+                  onChange={(e) => setEditDisplayName(e.target.value)}
+                  placeholder="e.g. John Doe"
+                  className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 font-medium focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 transition shadow-2xs"
+                />
               </div>
-              <div className="flex justify-between py-1">
-                <span className="font-semibold text-slate-500">Cloud Sync Status</span>
-                <span className="font-bold text-emerald-600">Active</span>
+
+              {/* Email (Read Only) */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Email Address (Verified)
+                </label>
+                <input
+                  type="email"
+                  disabled
+                  value={currentUser.email || ""}
+                  className="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-xs text-slate-500 font-medium cursor-not-allowed"
+                />
               </div>
-            </div>
+
+              <button
+                type="submit"
+                disabled={isSavingProfile}
+                className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition duration-150 flex items-center justify-center gap-2 cursor-pointer shadow-2xs"
+              >
+                {isSavingProfile ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Saving Profile...</span>
+                  </>
+                ) : (
+                  <>
+                    <Check className="w-4 h-4" />
+                    <span>Save Profile Changes</span>
+                  </>
+                )}
+              </button>
+            </form>
 
             {/* Password Recovery Option */}
             {currentUser.email && (
-              <div className="pt-1">
+              <div className="pt-2 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={handleSendResetEmail}
@@ -297,12 +481,12 @@ export const AuthUserMenu: React.FC<AuthUserMenuProps> = ({ onOpenAdmin }) => {
                   className="w-full py-2.5 px-4 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl font-bold text-xs border border-rose-200 transition flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Trash2 className="w-4 h-4 text-rose-600" />
-                  <span>Delete My Account</span>
+                  <span>Delete Account & Data</span>
                 </button>
               ) : (
                 <div className="p-4 bg-rose-50 rounded-2xl border border-rose-200 space-y-3">
                   <p className="text-xs text-rose-900 font-medium leading-relaxed">
-                    Are you sure? This will permanently delete your user profile and all saved resumes from cloud storage. This action cannot be undone.
+                    Are you sure? This will permanently delete your user account, profile picture, and all saved resumes from cloud storage. This action cannot be undone.
                   </p>
                   <div className="flex items-center gap-2">
                     <button

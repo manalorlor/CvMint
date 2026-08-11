@@ -364,6 +364,12 @@ export const ResumeRenderer: React.FC<ResumeRendererProps> = ({ resume, scale = 
                   <span className="truncate">{personalInfo.github}</span>
                 </div>
               )}
+              {(personalInfo.portfolio || personalInfo.website) && (
+                <div className="flex items-center gap-2">
+                  <Globe className="w-3.5 h-3.5 flex-shrink-0" style={{ color: accentColor }} />
+                  <span className="truncate">{personalInfo.portfolio || personalInfo.website}</span>
+                </div>
+              )}
             </div>
 
             {/* Skills in Sidebar */}
@@ -439,6 +445,11 @@ export const ResumeRenderer: React.FC<ResumeRendererProps> = ({ resume, scale = 
             {personalInfo.github && (
               <span className="flex items-center gap-1">
                 {showIcons && <Github className="w-3 h-3 text-gray-400" />} {personalInfo.github}
+              </span>
+            )}
+            {(personalInfo.portfolio || personalInfo.website) && (
+              <span className="flex items-center gap-1">
+                {showIcons && <Globe className="w-3 h-3 text-gray-400" />} {personalInfo.portfolio || personalInfo.website}
               </span>
             )}
           </div>
