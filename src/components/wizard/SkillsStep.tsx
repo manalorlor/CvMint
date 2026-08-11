@@ -25,23 +25,40 @@ const LEVELS: SkillLevel[] = ["Beginner", "Intermediate", "Advanced", "Expert"];
 export const SkillsStep: React.FC<StepProps> = ({ resume, onChange }) => {
   const skillList = resume.skills || [];
   const [newSkillName, setNewSkillName] = useState("");
-  const [newCategory, setNewCategory] = useState<SkillCategory>("Technical Skills");
-  const [newLevel, setNewLevel] = useState<SkillLevel>("Advanced");
+  const [newCategory, setNewCategory] = useState<string>("Technical Skills");
+  const [customCategory, setCustomCategory] = useState("");
+  const [isCustomCatSelected, setIsCustomCatSelected] = useState(false);
+  const [newLevel, setNewLevel] = useState<string>("Advanced");
+  const [customLevel, setCustomLevel] = useState("");
+  const [isCustomLevelSelected, setIsCustomLevelSelected] = useState(false);
   const [isSuggesting, setIsSuggesting] = useState(false);
 
   const handleAddSkill = () => {
     if (!newSkillName.trim()) return;
+    const finalCategory = (isCustomCatSelected ? customCategory.trim() : newCategory) || "Technical Skills";
+    const finalLevel = (isCustomLevelSelected ? customLevel.trim() : newLevel) || "Advanced";
+
     const newItem: SkillItem = {
       id: "sk-" + Date.now(),
       name: newSkillName.trim(),
-      category: newCategory,
-      level: newLevel,
+      category: finalCategory as SkillCategory,
+      level: finalLevel as SkillLevel,
     };
     onChange({
       ...resume,
       skills: [...skillList, newItem],
     });
     setNewSkillName("");
+    if (isCustomCatSelected) {
+      setCustomCategory("");
+      setIsCustomCatSelected(false);
+      setNewCategory("Technical Skills");
+    }
+    if (isCustomLevelSelected) {
+      setCustomLevel("");
+      setIsCustomLevelSelected(false);
+      setNewLevel("Advanced");
+    }
   };
 
   const handleRemoveSkill = (id: string) => {
@@ -140,27 +157,65 @@ export const SkillsStep: React.FC<StepProps> = ({ resume, onChange }) => {
         <div className="md:col-span-3">
           <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-tighter mb-1">Category</label>
           <select
-            value={newCategory}
-            onChange={(e) => setNewCategory(e.target.value as SkillCategory)}
+            value={isCustomCatSelected ? "Other" : newCategory}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val === "Other") {
+                setIsCustomCatSelected(true);
+              } else {
+                setIsCustomCatSelected(false);
+                setNewCategory(val);
+              }
+            }}
             className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none bg-white text-slate-900"
           >
             {CATEGORIES.map((c) => (
               <option key={c} value={c}>{c}</option>
             ))}
+            <option value="Other">Other (Type custom category)</option>
           </select>
+
+          {isCustomCatSelected && (
+            <input
+              type="text"
+              value={customCategory}
+              onChange={(e) => setCustomCategory(e.target.value)}
+              placeholder="Type custom category..."
+              className="w-full mt-1.5 px-3 py-1.5 border border-emerald-300 rounded-lg text-xs bg-emerald-50/50 focus:ring-2 focus:ring-emerald-500 outline-none text-slate-900"
+            />
+          )}
         </div>
 
         <div className="md:col-span-2">
           <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-tighter mb-1">Level</label>
           <select
-            value={newLevel}
-            onChange={(e) => setNewLevel(e.target.value as SkillLevel)}
+            value={isCustomLevelSelected ? "Other" : newLevel}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val === "Other") {
+                setIsCustomLevelSelected(true);
+              } else {
+                setIsCustomLevelSelected(false);
+                setNewLevel(val);
+              }
+            }}
             className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none bg-white text-slate-900"
           >
             {LEVELS.map((l) => (
               <option key={l} value={l}>{l}</option>
             ))}
+            <option value="Other">Other (Type custom level)</option>
           </select>
+
+          {isCustomLevelSelected && (
+            <input
+              type="text"
+              value={customLevel}
+              onChange={(e) => setCustomLevel(e.target.value)}
+              placeholder="Type custom level..."
+              className="w-full mt-1.5 px-3 py-1.5 border border-emerald-300 rounded-lg text-xs bg-emerald-50/50 focus:ring-2 focus:ring-emerald-500 outline-none text-slate-900"
+            />
+          )}
         </div>
 
         <div className="md:col-span-2">

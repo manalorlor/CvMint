@@ -21,7 +21,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   const isAdmin = currentUser?.email
-    ? ADMIN_EMAILS.includes(currentUser.email.toLowerCase()) || currentUser.email.toLowerCase().includes("admin")
+    ? ADMIN_EMAILS.includes(currentUser.email.toLowerCase())
     : false;
 
   if (!isAdmin) {

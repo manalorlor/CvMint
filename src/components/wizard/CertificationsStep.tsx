@@ -108,13 +108,13 @@ export const CertificationsStep: React.FC<StepProps> = ({ resume, onChange }) =>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Issue Date</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Issue Date (Optional)</label>
                   <input
                     type="text"
                     value={cert.issueDate || ""}
                     onChange={(e) => handleChange(cert.id, "issueDate", e.target.value)}
-                    className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    placeholder="2023-05"
+                    className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    placeholder="e.g. 2023-05 (Optional)"
                   />
                 </div>
 
@@ -124,8 +124,8 @@ export const CertificationsStep: React.FC<StepProps> = ({ resume, onChange }) =>
                     type="text"
                     value={cert.expiryDate || ""}
                     onChange={(e) => handleChange(cert.id, "expiryDate", e.target.value)}
-                    className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    placeholder="2026-05"
+                    className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    placeholder="e.g. 2026-05 (Optional)"
                   />
                 </div>
 
@@ -135,8 +135,8 @@ export const CertificationsStep: React.FC<StepProps> = ({ resume, onChange }) =>
                     type="text"
                     value={cert.credentialId || ""}
                     onChange={(e) => handleChange(cert.id, "credentialId", e.target.value)}
-                    className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    placeholder="AWS-ASA-930219"
+                    className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    placeholder="e.g. AWS-ASA-930219 (Optional)"
                   />
                 </div>
               </div>

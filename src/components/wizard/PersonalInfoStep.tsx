@@ -279,11 +279,20 @@ export const PersonalInfoStep: React.FC<StepProps> = ({ resume, onChange }) => {
 
   const availableDistricts = p.region ? (GHANA_DISTRICTS_BY_REGION[p.region] || []) : [];
 
+  const [isCustomRegion, setIsCustomRegion] = React.useState(
+    p.region ? !GHANA_REGIONS.includes(p.region) : false
+  );
+  const [isCustomDistrict, setIsCustomDistrict] = React.useState(
+    p.district && p.region && GHANA_DISTRICTS_BY_REGION[p.region]
+      ? !GHANA_DISTRICTS_BY_REGION[p.region].includes(p.district)
+      : false
+  );
+
   return (
     <div className="space-y-6">
       <div>
         <h3 className="text-xl font-bold text-slate-900">Personal Information</h3>
-        <p className="text-sm text-slate-600">Provide your contact info and Ghana address details so recruiters and ATS systems can contact you.</p>
+        <p className="text-sm text-slate-600">Provide your contact info and location details so recruiters and ATS systems can contact you.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -299,13 +308,13 @@ export const PersonalInfoStep: React.FC<StepProps> = ({ resume, onChange }) => {
         </div>
 
         <div>
-          <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-tighter mb-1">Middle Name</label>
+          <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-tighter mb-1">Middle Name (Optional)</label>
           <input
             type="text"
             value={p.middleName || ""}
             onChange={(e) => handleInfoChange("middleName", e.target.value)}
             className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none bg-white text-slate-900"
-            placeholder="Kojo"
+            placeholder="e.g. Kojo (Optional)"
           />
         </div>
 
@@ -339,18 +348,18 @@ export const PersonalInfoStep: React.FC<StepProps> = ({ resume, onChange }) => {
               });
             }}
             className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none bg-white text-slate-900"
-            placeholder="e.g., Senior Software Developer / Data Analyst"
+            placeholder="e.g. Senior Software Engineer / Data Analyst"
           />
         </div>
 
         <div>
-          <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-tighter mb-1">Field of Study / Career Field</label>
+          <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-tighter mb-1">Field of Study / Career Field (Optional)</label>
           <input
             type="text"
             value={resume.fieldOfStudy || ""}
             onChange={(e) => onChange({ ...resume, fieldOfStudy: e.target.value })}
             className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none bg-white text-slate-900"
-            placeholder="e.g., Computer Engineering, Accounting, Nursing"
+            placeholder="e.g. Computer Engineering, Accounting, Nursing (Optional)"
           />
         </div>
       </div>
@@ -379,13 +388,13 @@ export const PersonalInfoStep: React.FC<StepProps> = ({ resume, onChange }) => {
         </div>
 
         <div>
-          <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-tighter mb-1">Alternative Phone</label>
+          <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-tighter mb-1">Alternative Phone (Optional)</label>
           <input
             type="text"
             value={p.altPhoneNumber || ""}
             onChange={(e) => handleInfoChange("altPhoneNumber", e.target.value)}
             className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none bg-white text-slate-900"
-            placeholder="+233 50 987 6543"
+            placeholder="e.g. +233 50 987 6543 (Optional)"
           />
         </div>
       </div>
@@ -403,8 +412,17 @@ export const PersonalInfoStep: React.FC<StepProps> = ({ resume, onChange }) => {
               Region (Ghana) <span className="text-red-500">*</span>
             </label>
             <select
-              value={p.region || ""}
-              onChange={(e) => handleRegionChange(e.target.value)}
+              value={isCustomRegion ? "Other" : (p.region || "")}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val === "Other") {
+                  setIsCustomRegion(true);
+                  handleRegionChange("");
+                } else {
+                  setIsCustomRegion(false);
+                  handleRegionChange(val);
+                }
+              }}
               required
               className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none bg-white text-slate-900 font-medium"
             >
@@ -414,69 +432,102 @@ export const PersonalInfoStep: React.FC<StepProps> = ({ resume, onChange }) => {
                   {r}
                 </option>
               ))}
+              <option value="Other">Other / International (Type Custom Below)</option>
             </select>
+
+            {isCustomRegion && (
+              <div className="mt-2">
+                <input
+                  type="text"
+                  value={p.region || ""}
+                  onChange={(e) => handleRegionChange(e.target.value)}
+                  className="w-full px-3 py-2 border border-emerald-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none bg-emerald-50/40 text-slate-900"
+                  placeholder="Type your custom region, state, or country..."
+                />
+              </div>
+            )}
           </div>
 
           <div>
             <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-tighter mb-1">
-              District / Municipality / Metro
+              District / Municipality / Metro (Optional)
             </label>
             <select
-              value={p.district || ""}
-              onChange={(e) => handleInfoChange("district", e.target.value)}
-              disabled={!p.region}
+              value={isCustomDistrict ? "Other" : (p.district || "")}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val === "Other") {
+                  setIsCustomDistrict(true);
+                  handleInfoChange("district", "");
+                } else {
+                  setIsCustomDistrict(false);
+                  handleInfoChange("district", val);
+                }
+              }}
+              disabled={!p.region && !isCustomRegion}
               className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none bg-white text-slate-900 disabled:opacity-50 disabled:bg-slate-100"
             >
-              {!p.region ? (
+              {!p.region && !isCustomRegion ? (
                 <option value="">-- Select Region First --</option>
-              ) : availableDistricts.length === 0 ? (
-                <option value="">-- No Districts Found --</option>
               ) : (
                 <>
-                  <option value="">-- Select District / Municipality --</option>
+                  <option value="">-- Select District / Municipality (Optional) --</option>
                   {availableDistricts.map((d) => (
                     <option key={d} value={d}>
                       {d}
                     </option>
                   ))}
+                  <option value="Other">Other (Type custom district or town)</option>
                 </>
               )}
             </select>
+
+            {isCustomDistrict && (
+              <div className="mt-2">
+                <input
+                  type="text"
+                  value={p.district || ""}
+                  onChange={(e) => handleInfoChange("district", e.target.value)}
+                  className="w-full px-3 py-2 border border-emerald-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none bg-emerald-50/40 text-slate-900"
+                  placeholder="Type custom district or locality (Optional)..."
+                />
+              </div>
+            )}
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-tighter mb-1">Residential Area / City / Town</label>
+            <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-tighter mb-1">Residential Area / City / Town (Optional)</label>
             <input
               type="text"
               value={p.address || ""}
               onChange={(e) => handleInfoChange("address", e.target.value)}
               className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none bg-white text-slate-900"
-              placeholder="e.g. East Legon, Accra"
+              placeholder="e.g. East Legon, Accra (Optional)"
             />
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-tighter mb-1">Digital Address (GPS Address)</label>
+            <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-tighter mb-1">Digital Address / GPS (Optional)</label>
             <input
               type="text"
               value={p.digitalAddress || ""}
               onChange={(e) => handleInfoChange("digitalAddress", e.target.value)}
               className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none bg-white text-slate-900"
-              placeholder="e.g. GA-183-9021"
+              placeholder="e.g. GA-183-9021 (Optional)"
             />
-            <p className="text-[10px] text-slate-500 mt-1">GhanaPost GPS (e.g. GA-183-9021)</p>
+            <p className="text-[10px] text-slate-500 mt-1">GhanaPost GPS e.g. GA-183-9021 (Optional)</p>
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-tighter mb-1">Nationality</label>
+            <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-tighter mb-1">Nationality (Optional)</label>
             <input
               type="text"
               value={p.nationality || ""}
               onChange={(e) => handleInfoChange("nationality", e.target.value)}
               className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none bg-white text-slate-900"
-              placeholder="Ghanaian"
+              placeholder="e.g. Ghanaian (Optional)"
             />
           </div>
         </div>
@@ -484,29 +535,29 @@ export const PersonalInfoStep: React.FC<StepProps> = ({ resume, onChange }) => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-tighter mb-1">LinkedIn Profile</label>
+          <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-tighter mb-1">LinkedIn Profile (Optional)</label>
           <input
             type="text"
             value={p.linkedin || ""}
             onChange={(e) => handleInfoChange("linkedin", e.target.value)}
             className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none bg-white text-slate-900"
-            placeholder="linkedin.com/in/kwamemensah"
+            placeholder="e.g. linkedin.com/in/kwamemensah (Optional)"
           />
         </div>
 
         <div>
-          <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-tighter mb-1">GitHub Profile</label>
+          <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-tighter mb-1">GitHub Profile (Optional)</label>
           <input
             type="text"
             value={p.github || ""}
             onChange={(e) => handleInfoChange("github", e.target.value)}
             className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none bg-white text-slate-900"
-            placeholder="github.com/kwamemensah"
+            placeholder="e.g. github.com/kwamemensah (Optional)"
           />
         </div>
 
         <div>
-          <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-tighter mb-1">Portfolio / Website</label>
+          <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-tighter mb-1">Portfolio / Website (Optional)</label>
           <input
             type="text"
             value={p.portfolio !== undefined ? p.portfolio : (p.website || "")}
@@ -522,7 +573,7 @@ export const PersonalInfoStep: React.FC<StepProps> = ({ resume, onChange }) => {
               });
             }}
             className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none bg-white text-slate-900"
-            placeholder="e.g. kwamemensah.dev or myportfolio.com"
+            placeholder="e.g. kwamemensah.dev or myportfolio.com (Optional)"
           />
         </div>
       </div>

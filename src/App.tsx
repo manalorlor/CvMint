@@ -263,8 +263,8 @@ export function App() {
         </div>
       </footer>
 
-      {/* Hidden offscreen printable container for PDF generation */}
-      <div className="sr-only fixed top-0 left-0 w-0 h-0 overflow-hidden pointer-events-none opacity-0" aria-hidden="true">
+      {/* Dedicated printable container isolated for system printing */}
+      <div id="print-resume-container" className="hidden print:block" aria-hidden="true">
         <ResumeRenderer resume={activeResume} scale={1} />
       </div>
 

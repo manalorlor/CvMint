@@ -110,13 +110,13 @@ export const ProjectsStep: React.FC<StepProps> = ({ resume, onChange }) => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Technologies Used</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Technologies Used (Optional)</label>
                   <input
                     type="text"
                     value={proj.technologiesUsed || ""}
                     onChange={(e) => handleChange(proj.id, "technologiesUsed", e.target.value)}
-                    className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    placeholder="e.g. React, TypeScript, Python, GCP"
+                    className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    placeholder="e.g. React, TypeScript, Python, GCP (Optional)"
                   />
                 </div>
               </div>
@@ -127,7 +127,7 @@ export const ProjectsStep: React.FC<StepProps> = ({ resume, onChange }) => {
                   rows={2}
                   value={proj.description || ""}
                   onChange={(e) => handleChange(proj.id, "description", e.target.value)}
-                  className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                   placeholder="Describe key problem solved, architectural approach, and impact..."
                 />
               </div>
@@ -139,8 +139,8 @@ export const ProjectsStep: React.FC<StepProps> = ({ resume, onChange }) => {
                     type="text"
                     value={proj.projectLink || ""}
                     onChange={(e) => handleChange(proj.id, "projectLink", e.target.value)}
-                    className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    placeholder="https://myproject.com"
+                    className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    placeholder="https://myproject.com (Optional)"
                   />
                 </div>
 
@@ -150,8 +150,8 @@ export const ProjectsStep: React.FC<StepProps> = ({ resume, onChange }) => {
                     type="text"
                     value={proj.githubLink || ""}
                     onChange={(e) => handleChange(proj.id, "githubLink", e.target.value)}
-                    className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    placeholder="github.com/user/project"
+                    className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    placeholder="github.com/user/project (Optional)"
                   />
                 </div>
               </div>

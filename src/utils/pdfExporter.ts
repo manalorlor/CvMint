@@ -188,51 +188,43 @@ function convertElementStylesToRgb(originalEl: HTMLElement, cloneEl: HTMLElement
 export const exportToPdf = async (resume: ResumeData): Promise<void> => {
   const filename = `${resume.personalInfo?.firstName || "Resume"}_${resume.personalInfo?.lastName || "CV"}.pdf`;
 
-  let element = document.getElementById("resume-printable-area");
-  let dynamicContainer: HTMLElement | null = null;
-  let reactRoot: any = null;
+  // Always create a clean offscreen container rendered at 800px width without any parent transforms
+  const container = document.createElement("div");
+  container.style.position = "absolute";
+  container.style.left = "-9999px";
+  container.style.top = "-9999px";
+  container.style.width = "800px";
+  container.style.backgroundColor = "#ffffff";
+  document.body.appendChild(container);
 
-  if (!element) {
-    // Dynamically render offscreen if not currently mounted in preview mode
-    dynamicContainer = document.createElement("div");
-    dynamicContainer.style.position = "absolute";
-    dynamicContainer.style.left = "-9999px";
-    dynamicContainer.style.top = "-9999px";
-    dynamicContainer.style.width = "800px";
-    document.body.appendChild(dynamicContainer);
+  const reactRoot = createRoot(container);
+  reactRoot.render(React.createElement(ResumeRenderer, { resume, scale: 1 }));
 
-    reactRoot = createRoot(dynamicContainer);
-    reactRoot.render(React.createElement(ResumeRenderer, { resume, scale: 1 }));
-    await new Promise((resolve) => setTimeout(resolve, 200));
+  // Wait for React rendering and font styling to settle
+  await new Promise((resolve) => setTimeout(resolve, 300));
 
-    element = (dynamicContainer.querySelector("#resume-printable-area") ||
-      dynamicContainer.firstElementChild) as HTMLElement;
-  }
+  const element = (container.querySelector("#resume-printable-area") ||
+    container.firstElementChild) as HTMLElement;
 
   if (!element) {
     console.error("Could not locate printable resume element");
+    reactRoot.unmount();
+    if (document.body.contains(container)) {
+      document.body.removeChild(container);
+    }
     window.print();
     return;
   }
 
-  // Create a clean container offscreen without scale transforms
-  const wrapper = document.createElement("div");
-  wrapper.style.position = "absolute";
-  wrapper.style.left = "-9999px";
-  wrapper.style.top = "-9999px";
+  // Ensure element has standard unscaled dimensions
+  element.style.transform = "none";
+  element.style.boxShadow = "none";
+  element.style.width = "800px";
+  element.style.maxWidth = "100%";
+  element.style.margin = "0";
 
-  const clone = element.cloneNode(true) as HTMLElement;
-  clone.style.transform = "none";
-  clone.style.boxShadow = "none";
-  clone.style.width = "794px"; // Standard A4 width in pixels at 96 DPI
-  clone.style.maxWidth = "100%";
-  clone.style.margin = "0";
-
-  // Process computed styles to replace any oklch colors with explicit RGB values
-  convertElementStylesToRgb(element, clone);
-
-  wrapper.appendChild(clone);
-  document.body.appendChild(wrapper);
+  // Process computed styles to replace any oklch/oklab colors with explicit RGB values
+  convertElementStylesToRgb(element, element);
 
   const opt = {
     margin: [0, 0, 0, 0],
@@ -242,6 +234,8 @@ export const exportToPdf = async (resume: ResumeData): Promise<void> => {
       scale: 2,
       useCORS: true,
       logging: false,
+      width: 800,
+      windowWidth: 800,
       onclone: (clonedDoc: Document) => {
         // Sanitize unsupported colors in all <style> tags in the cloned document
         const styleEls = clonedDoc.querySelectorAll("style");
@@ -264,19 +258,14 @@ export const exportToPdf = async (resume: ResumeData): Promise<void> => {
   };
 
   try {
-    await (html2pdf as any)().set(opt).from(clone).save();
+    await (html2pdf as any)().set(opt).from(element).save();
   } catch (err) {
     console.error("PDF generation error, falling back to print:", err);
     window.print();
   } finally {
-    if (document.body.contains(wrapper)) {
-      document.body.removeChild(wrapper);
-    }
-    if (reactRoot && dynamicContainer) {
-      reactRoot.unmount();
-      if (document.body.contains(dynamicContainer)) {
-        document.body.removeChild(dynamicContainer);
-      }
+    reactRoot.unmount();
+    if (document.body.contains(container)) {
+      document.body.removeChild(container);
     }
   }
 };

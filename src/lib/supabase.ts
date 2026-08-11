@@ -145,12 +145,21 @@ export async function logOut(): Promise<void> {
 export async function deleteAccountAndData(userId: string): Promise<void> {
   if (!isSupabaseConfigured) return;
   try {
-    await supabase.from('resumes').delete().eq('user_id', userId);
-    await supabase.from('profiles').delete().eq('id', userId);
+    const { error: resumeErr } = await supabase.from('resumes').delete().eq('user_id', userId);
+    if (resumeErr) {
+      console.error('Error deleting user resumes from Supabase database:', resumeErr);
+    }
+    const { error: profileErr } = await supabase.from('profiles').delete().eq('id', userId);
+    if (profileErr) {
+      console.error('Error deleting user profile from Supabase database:', profileErr);
+    }
   } catch (err) {
     console.warn('Could not delete user Supabase records:', err);
   }
-  await supabase.auth.signOut();
+  const { error: signOutErr } = await supabase.auth.signOut();
+  if (signOutErr) {
+    console.error('Error signing out after account deletion:', signOutErr);
+  }
 }
 
 // Supabase Resume Operations

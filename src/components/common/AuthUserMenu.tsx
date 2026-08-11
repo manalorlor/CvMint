@@ -95,7 +95,7 @@ export const AuthUserMenu: React.FC<AuthUserMenuProps> = ({ onOpenAdmin }) => {
 
   const ADMIN_EMAILS = ["manassehlorlor@gmail.com"];
   const isAdminUser = currentUser?.email
-    ? ADMIN_EMAILS.includes(currentUser.email.toLowerCase()) || currentUser.email.toLowerCase().includes("admin")
+    ? ADMIN_EMAILS.includes(currentUser.email.toLowerCase())
     : false;
 
   const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -321,8 +321,8 @@ export const AuthUserMenu: React.FC<AuthUserMenuProps> = ({ onOpenAdmin }) => {
                 <UserIcon className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-slate-900">User Profile</h3>
-                <p className="text-xs text-slate-500">Update photo, username, and account details</p>
+                <h3 className="text-lg font-bold text-slate-900">Account Settings</h3>
+                <p className="text-xs text-slate-500">Manage your profile picture, name, authentication, and database records</p>
               </div>
             </div>
 
@@ -453,21 +453,35 @@ export const AuthUserMenu: React.FC<AuthUserMenuProps> = ({ onOpenAdmin }) => {
               </button>
             </form>
 
-            {/* Password Recovery Option */}
-            {currentUser.email && (
-              <div className="pt-2 border-t border-slate-100">
+            {/* Account Actions: Sign Out & Reset Password */}
+            <div className="pt-2 border-t border-slate-100 space-y-2">
+              <div className="flex flex-col sm:flex-row gap-2">
+                {currentUser.email && (
+                  <button
+                    type="button"
+                    onClick={handleSendResetEmail}
+                    className="flex-1 py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 border border-slate-200 cursor-pointer"
+                  >
+                    <Key className="w-4 h-4 text-slate-600" />
+                    <span>Reset Password</span>
+                  </button>
+                )}
+
                 <button
                   type="button"
-                  onClick={handleSendResetEmail}
-                  className="w-full py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 border border-slate-200 cursor-pointer"
+                  onClick={() => {
+                    logoutUser();
+                    setShowAccountModal(false);
+                  }}
+                  className="flex-1 py-2.5 px-3 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
                 >
-                  <Key className="w-4 h-4 text-slate-600" />
-                  <span>Send Password Reset Email</span>
+                  <LogOut className="w-4 h-4 text-slate-300" />
+                  <span>Sign Out of Account</span>
                 </button>
               </div>
-            )}
+            </div>
 
-            {/* Danger Zone / Account Deletion */}
+            {/* Danger Zone / Account & Database Deletion */}
             <div className="pt-3 border-t border-slate-200/80">
               <h4 className="text-xs font-bold text-rose-600 mb-2 flex items-center gap-1.5">
                 <ShieldAlert className="w-4 h-4 text-rose-500" />
@@ -481,12 +495,12 @@ export const AuthUserMenu: React.FC<AuthUserMenuProps> = ({ onOpenAdmin }) => {
                   className="w-full py-2.5 px-4 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl font-bold text-xs border border-rose-200 transition flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Trash2 className="w-4 h-4 text-rose-600" />
-                  <span>Delete Account & Data</span>
+                  <span>Delete Account & Wipe Database Records</span>
                 </button>
               ) : (
                 <div className="p-4 bg-rose-50 rounded-2xl border border-rose-200 space-y-3">
                   <p className="text-xs text-rose-900 font-medium leading-relaxed">
-                    Are you sure? This will permanently delete your user account, profile picture, and all saved resumes from cloud storage. This action cannot be undone.
+                    Are you sure? This will permanently delete your user account, profile picture, and all associated resume records from the database. All your data will be completely cleared from the database. This action cannot be undone.
                   </p>
                   <div className="flex items-center gap-2">
                     <button
@@ -498,10 +512,10 @@ export const AuthUserMenu: React.FC<AuthUserMenuProps> = ({ onOpenAdmin }) => {
                       {isDeleting ? (
                         <>
                           <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          <span>Deleting...</span>
+                          <span>Deleting & Wiping Database...</span>
                         </>
                       ) : (
-                        <span>Yes, Delete Account</span>
+                        <span>Yes, Delete Account & Wipe DB</span>
                       )}
                     </button>
                     <button

@@ -21,24 +21,71 @@ html, body, #root {
 }
 
 @media print {
-  /* Hide all UI header, navigation, sidebars, buttons and modals during printing */
-  nav, header, button, .no-print, [role="dialog"], .customizer-panel {
-    display: none !important;
-  }
-  
-  body, main {
-    background: white !important;
-    color: black !important;
+  /* Reset document for printing */
+  html, body {
+    background: #ffffff !important;
+    color: #000000 !important;
     margin: 0 !important;
     padding: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
   }
-  
-  .resume-print-document {
-    transform: none !important;
-    box-shadow: none !important;
+
+  /* Hide all web UI: header, footer, navigation, main layout, modals, sidebars, buttons, form controls */
+  nav,
+  header,
+  footer,
+  main,
+  aside,
+  form,
+  button,
+  input,
+  select,
+  textarea,
+  .no-print,
+  [role="dialog"],
+  .customizer-panel,
+  .wizard-container {
+    display: none !important;
+  }
+
+  /* Position and display the isolated printable resume container */
+  #print-resume-container {
+    display: block !important;
+    visibility: visible !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    z-index: 999999 !important;
+  }
+
+  #print-resume-container #resume-printable-area {
+    box-shadow: none !important;
+    border: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    border-radius: 0 !important;
+  }
+
+  #print-resume-container * {
+    visibility: visible !important;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 8mm;
   }
 }

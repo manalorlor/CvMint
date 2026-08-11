@@ -136,59 +136,59 @@ export const ReferencesStep: React.FC<StepProps> = ({ resume, onChange }) => {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Full Name</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Full Name (Optional)</label>
                   <input
                     type="text"
                     value={ref.name || ""}
                     onChange={(e) => handleUpdateCustom(ref.id, "name", e.target.value)}
-                    className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    placeholder="Ing. Emmanuel Ampofo"
+                    className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    placeholder="e.g. Ing. Emmanuel Ampofo (Optional)"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Position / Title</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Position / Title (Optional)</label>
                   <input
                     type="text"
                     value={ref.position || ""}
                     onChange={(e) => handleUpdateCustom(ref.id, "position", e.target.value)}
-                    className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    placeholder="Director of Engineering"
+                    className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    placeholder="e.g. Director of Engineering (Optional)"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Company</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Company / Organization (Optional)</label>
                   <input
                     type="text"
                     value={ref.company || ""}
                     onChange={(e) => handleUpdateCustom(ref.id, "company", e.target.value)}
-                    className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    placeholder="Hubtel Ghana"
+                    className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    placeholder="e.g. Hubtel Ghana (Optional)"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Email</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Email Address (Optional)</label>
                   <input
                     type="email"
                     value={ref.email || ""}
                     onChange={(e) => handleUpdateCustom(ref.id, "email", e.target.value)}
-                    className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    placeholder="e.ampofo@hubtel.com"
+                    className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    placeholder="e.g. e.ampofo@hubtel.com (Optional)"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Phone</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Phone Number (Optional)</label>
                   <input
                     type="text"
                     value={ref.phone || ""}
                     onChange={(e) => handleUpdateCustom(ref.id, "phone", e.target.value)}
-                    className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    placeholder="+233 24 300 1122"
+                    className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    placeholder="e.g. +233 24 300 1122 (Optional)"
                   />
                 </div>
               </div>

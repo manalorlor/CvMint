@@ -128,10 +128,14 @@ export const EducationStep: React.FC<StepProps> = ({ resume, onChange }) => {
 
                     {/* Ghanaian University Select Dropdown */}
                     <select
-                      value={GHANAIAN_UNIVERSITIES.some((u) => u.name === edu.institutionName) ? edu.institutionName : "custom"}
+                      value={
+                        GHANAIAN_UNIVERSITIES.some((u) => u.name === edu.institutionName)
+                          ? edu.institutionName
+                          : "Other"
+                      }
                       onChange={(e) => {
                         const val = e.target.value;
-                        if (val !== "custom") {
+                        if (val !== "Other") {
                           handleChange(edu.id, "institutionName", val);
                           if (!edu.country) {
                             handleChange(edu.id, "country", "Ghana");
@@ -140,7 +144,7 @@ export const EducationStep: React.FC<StepProps> = ({ resume, onChange }) => {
                       }}
                       className="w-full px-3 py-1.5 text-xs border border-emerald-200 bg-emerald-50/50 rounded-lg text-emerald-950 font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none mb-1"
                     >
-                      <option value="custom">-- Choose from Ghanaian Universities List --</option>
+                      <option value="Other">-- Choose from Ghanaian Universities List (or select Other) --</option>
                       
                       <optgroup label="Public Universities">
                         {GHANAIAN_UNIVERSITIES.filter((u) => u.category === "Public").map((uni) => (
@@ -173,6 +177,7 @@ export const EducationStep: React.FC<StepProps> = ({ resume, onChange }) => {
                           </option>
                         ))}
                       </optgroup>
+                      <option value="Other">Other / Unlisted Institution (Type custom name below)</option>
                     </select>
 
                     {/* Autocomplete Input with datalist */}
@@ -186,19 +191,19 @@ export const EducationStep: React.FC<StepProps> = ({ resume, onChange }) => {
                           handleChange(edu.id, "country", "Ghana");
                         }
                       }}
-                      className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                      placeholder="e.g. Kwame Nkrumah University of Science and Technology (KNUST)"
+                      className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                      placeholder="Type or select university name (e.g. KNUST, UG Legon, Harvard)..."
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Country / Location</label>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Country / Location (Optional)</label>
                     <input
                       type="text"
                       value={edu.country || ""}
                       onChange={(e) => handleChange(edu.id, "country", e.target.value)}
-                      className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                      placeholder="Ghana"
+                      className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                      placeholder="e.g. Ghana (Optional)"
                     />
                   </div>
                 </div>
@@ -234,60 +239,99 @@ export const EducationStep: React.FC<StepProps> = ({ resume, onChange }) => {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Degree *</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Degree Level *</label>
+                  <select
+                    value={
+                      [
+                        "Bachelor of Science (B.Sc.)",
+                        "Bachelor of Arts (B.A.)",
+                        "Bachelor of Technology (B.Tech)",
+                        "Master of Science (M.Sc.)",
+                        "Master of Business Administration (MBA)",
+                        "Doctor of Philosophy (Ph.D.)",
+                        "Higher National Diploma (HND)",
+                        "Diploma",
+                        "WASSCE / High School Certificate",
+                        "Professional Certification"
+                      ].includes(edu.degree || "")
+                        ? edu.degree
+                        : "Other"
+                    }
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val !== "Other") {
+                        handleChange(edu.id, "degree", val);
+                      }
+                    }}
+                    className="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg text-slate-900 font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none mb-1 bg-white"
+                  >
+                    <option value="">-- Select Degree / Qualification --</option>
+                    <option value="Bachelor of Science (B.Sc.)">Bachelor of Science (B.Sc.)</option>
+                    <option value="Bachelor of Arts (B.A.)">Bachelor of Arts (B.A.)</option>
+                    <option value="Bachelor of Technology (B.Tech)">Bachelor of Technology (B.Tech)</option>
+                    <option value="Master of Science (M.Sc.)">Master of Science (M.Sc.)</option>
+                    <option value="Master of Business Administration (MBA)">Master of Business Administration (MBA)</option>
+                    <option value="Doctor of Philosophy (Ph.D.)">Doctor of Philosophy (Ph.D.)</option>
+                    <option value="Higher National Diploma (HND)">Higher National Diploma (HND)</option>
+                    <option value="Diploma">Diploma</option>
+                    <option value="WASSCE / High School Certificate">WASSCE / High School Certificate</option>
+                    <option value="Professional Certification">Professional Certification</option>
+                    <option value="Other">Other (Type Custom Degree Below)</option>
+                  </select>
+
                   <input
                     type="text"
                     value={edu.degree || ""}
                     onChange={(e) => handleChange(edu.id, "degree", e.target.value)}
-                    className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    placeholder="Bachelor of Science / Master of Arts"
+                    className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    placeholder="e.g. Bachelor of Science / Diploma"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Field of Study *</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Field of Study / Major *</label>
                   <input
                     type="text"
                     value={edu.fieldOfStudy || ""}
                     onChange={(e) => handleChange(edu.id, "fieldOfStudy", e.target.value)}
-                    className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    placeholder="Computer Science / Economics"
+                    className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    placeholder="e.g. Computer Science / Economics"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">GPA / Grade / Class</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">GPA / Grade / Class (Optional)</label>
                   <input
                     type="text"
                     value={edu.gradeGpa || ""}
                     onChange={(e) => handleChange(edu.id, "gradeGpa", e.target.value)}
-                    className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    placeholder="3.85 / 4.0 or First Class Honors"
+                    className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    placeholder="e.g. 3.85 / 4.0 or First Class Honors (Optional)"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Start Year</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Start Year (Optional)</label>
                   <input
                     type="text"
                     value={edu.startYear || ""}
                     onChange={(e) => handleChange(edu.id, "startYear", e.target.value)}
-                    className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    placeholder="2020"
+                    className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    placeholder="2020 (Optional)"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Completion Year</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Completion Year (Optional)</label>
                   <input
                     type="text"
                     disabled={edu.isCurrentStudent}
                     value={edu.completionYear || ""}
                     onChange={(e) => handleChange(edu.id, "completionYear", e.target.value)}
-                    className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:bg-gray-100"
-                    placeholder="2024"
+                    className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none disabled:bg-gray-100"
+                    placeholder="2024 (Optional)"
                   />
                 </div>
 

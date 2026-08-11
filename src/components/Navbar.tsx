@@ -3,6 +3,7 @@ import { ResumeData } from "../types";
 import { UndoRedoControls } from "./common/UndoRedoControls";
 import { CVMintLogo } from "./common/CVMintLogo";
 import { AuthUserMenu } from "./common/AuthUserMenu";
+import { useAuth } from "../context/AuthContext";
 import {
   FileText,
   Download,
@@ -55,6 +56,12 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const [exportOpen, setExportOpen] = useState(false);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+
+  const { currentUser } = useAuth();
+  const ADMIN_EMAILS = ["manassehlorlor@gmail.com"];
+  const isAdminUser = currentUser?.email
+    ? ADMIN_EMAILS.includes(currentUser.email.toLowerCase())
+    : false;
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -415,16 +422,18 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <span>ATS Keyword Checker</span>
                 </button>
 
-                <button
-                  onClick={() => {
-                    setMobileDrawerOpen(false);
-                    onOpenAdmin();
-                  }}
-                  className="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 transition flex items-center gap-3"
-                >
-                  <FileText className="w-4 h-4 text-slate-500" />
-                  <span>System Admin Panel</span>
-                </button>
+                {isAdminUser && (
+                  <button
+                    onClick={() => {
+                      setMobileDrawerOpen(false);
+                      onOpenAdmin();
+                    }}
+                    className="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 transition flex items-center gap-3"
+                  >
+                    <FileText className="w-4 h-4 text-amber-600" />
+                    <span>System Admin Panel</span>
+                  </button>
+                )}
               </div>
               {/* Export & Download Section */}
               <div className="pt-4 border-t border-slate-200 space-y-2">

@@ -14,6 +14,7 @@ import {
   isSupabaseConfigured,
 } from "../lib/supabase";
 import { useResumeStore } from "../store/useResumeStore";
+import { DEFAULT_RESUME } from "../data/defaultResume";
 
 interface AuthContextType {
   currentUser: User | null;
@@ -165,7 +166,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setIsSyncing(true);
       await deleteAccountAndData(currentUser.id);
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("cv_app_resumes");
+      }
+      setResumes([DEFAULT_RESUME]);
       setCurrentUser(null);
+    } catch (err) {
+      console.error("Failed to delete account and database data:", err);
+      throw err;
     } finally {
       setIsSyncing(false);
     }

@@ -140,7 +140,7 @@ export const ResumeRenderer: React.FC<ResumeRendererProps> = ({ resume, scale = 
             <SectionHeader title="WORK EXPERIENCE" icon={<Briefcase className="w-4 h-4" />} accentColor={accentColor} headingColor={headingColor} showIcons={showIcons} borderStyle={getBorderStyle()} />
             <div className="space-y-4">
               {workExperience.map((exp) => (
-                <div key={exp.id} className="relative pl-1">
+                <div key={exp.id} className="relative pl-1" style={{ pageBreakInside: "avoid", breakInside: "avoid" }}>
                   <div className="flex flex-wrap justify-between items-baseline gap-1">
                     <div>
                       <h4 className="font-bold text-[15px]" style={{ color: headingColor }}>
@@ -181,7 +181,7 @@ export const ResumeRenderer: React.FC<ResumeRendererProps> = ({ resume, scale = 
             <SectionHeader title="EDUCATION" icon={<GraduationCap className="w-4 h-4" />} accentColor={accentColor} headingColor={headingColor} showIcons={showIcons} borderStyle={getBorderStyle()} />
             <div className="space-y-3">
               {education.map((edu) => (
-                <div key={edu.id}>
+                <div key={edu.id} style={{ pageBreakInside: "avoid", breakInside: "avoid" }}>
                   <div className="flex flex-wrap justify-between items-baseline gap-1">
                     <div>
                       <h4 className="font-bold text-[14.5px]" style={{ color: headingColor }}>
@@ -235,7 +235,7 @@ export const ResumeRenderer: React.FC<ResumeRendererProps> = ({ resume, scale = 
             <SectionHeader title="KEY PROJECTS" icon={<FolderGit2 className="w-4 h-4" />} accentColor={accentColor} headingColor={headingColor} showIcons={showIcons} borderStyle={getBorderStyle()} />
             <div className="space-y-3">
               {projects.map((proj) => (
-                <div key={proj.id} className="space-y-1">
+                <div key={proj.id} className="space-y-1" style={{ pageBreakInside: "avoid", breakInside: "avoid" }}>
                   <div className="flex flex-wrap justify-between items-baseline">
                     <h4 className="font-bold text-[14px]" style={{ color: headingColor }}>
                       {proj.projectName}
@@ -265,7 +265,7 @@ export const ResumeRenderer: React.FC<ResumeRendererProps> = ({ resume, scale = 
             <SectionHeader title="CERTIFICATIONS & LICENSES" icon={<Award className="w-4 h-4" />} accentColor={accentColor} headingColor={headingColor} showIcons={showIcons} borderStyle={getBorderStyle()} />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               {certifications.map((cert) => (
-                <div key={cert.id} className="p-2 border border-gray-100 rounded bg-gray-50/60">
+                <div key={cert.id} className="p-2 border border-gray-100 rounded bg-gray-50/60" style={{ pageBreakInside: "avoid", breakInside: "avoid" }}>
                   <h5 className="font-semibold text-xs" style={{ color: headingColor }}>{cert.certificationName}</h5>
                   <p className="text-[11.5px] text-gray-600">{cert.institution} • {cert.issueDate}</p>
                   {cert.credentialId && <p className="text-[10px] text-gray-500 font-mono">ID: {cert.credentialId}</p>}
@@ -310,9 +310,9 @@ export const ResumeRenderer: React.FC<ResumeRendererProps> = ({ resume, scale = 
         className={`w-full max-w-[800px] mx-auto bg-white shadow-xl rounded-sm overflow-hidden text-gray-900 transition-all ${getFontSizeClass()}`}
         style={{ ...getFontFamilyStyle(), transform: scale !== 1 ? `scale(${scale})` : "none", transformOrigin: "top center" }}
       >
-        <div className="grid grid-cols-1 md:grid-cols-12 min-h-[1050px]">
+        <div className="grid grid-cols-1 md:grid-cols-12 print:grid-cols-12 min-h-[1050px]">
           {/* Left Sidebar */}
-          <div className={`md:col-span-4 p-6 space-y-6 ${isDark ? "bg-slate-900 text-white" : "bg-slate-50 text-slate-900 border-r border-slate-200"}`}>
+          <div className={`md:col-span-4 print:col-span-4 p-6 space-y-6 ${isDark ? "bg-slate-900 text-white" : "bg-slate-50 text-slate-900 border-r border-slate-200"}`}>
             {/* Photo */}
             {showPhoto && personalInfo.photoUrl && (
               <div className="flex justify-center">
@@ -394,7 +394,7 @@ export const ResumeRenderer: React.FC<ResumeRendererProps> = ({ resume, scale = 
           </div>
 
           {/* Main Content Area */}
-          <div className="md:col-span-8 p-6 md:p-8 space-y-6">
+          <div className="md:col-span-8 print:col-span-8 p-6 md:p-8 space-y-6">
             {sectionOrder.map((key) => renderSection(key))}
           </div>
         </div>
