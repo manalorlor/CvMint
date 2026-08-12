@@ -80,14 +80,14 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <>
       <nav className="sticky top-0 z-40 bg-white border-b border-slate-200/90 shadow-xs">
-        <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-1 sm:gap-3 overflow-x-clip">
+        <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-1 sm:gap-3">
           {/* Left: Mobile & Tablet Hamburger Menu Toggle + Brand Logo */}
-          <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
+          <div className="flex items-center gap-1 sm:gap-2.5 flex-shrink-0">
             {/* Hamburger Button for Mobile & Tablet view */}
             <button
               type="button"
               onClick={() => setMobileDrawerOpen(true)}
-              className="lg:hidden p-1.5 sm:p-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-slate-900 border border-slate-200 transition flex items-center gap-1.5 flex-shrink-0"
+              className="lg:hidden p-1.5 sm:p-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-slate-900 border border-slate-200 transition flex items-center gap-1.5 flex-shrink-0 cursor-pointer"
               aria-label="Open Navigation Menu"
             >
               <Menu className="w-5 h-5 text-slate-700" />
@@ -151,8 +151,8 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Right Tools & Export Dropdown */}
           <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-            {/* Stack Undo/Redo */}
-            <div className="hidden min-[380px]:flex flex-shrink-0">
+            {/* Stack Undo/Redo - Hidden on mobile (<sm) to prevent top bar crowding */}
+            <div className="hidden sm:flex flex-shrink-0">
               <UndoRedoControls size="sm" />
             </div>
 
@@ -169,21 +169,21 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* ATS Analyzer Button */}
             <button
               onClick={onOpenAts}
-              className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs font-bold bg-slate-800 hover:bg-slate-900 text-white rounded-lg transition flex-shrink-0"
+              className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs font-bold bg-slate-800 hover:bg-slate-900 text-white rounded-lg transition flex-shrink-0 cursor-pointer"
             >
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="hidden xs:inline">ATS Check</span>
-              <span className="xs:hidden">ATS</span>
+              <span className="hidden sm:inline">ATS Check</span>
+              <span className="sm:hidden text-[11px]">ATS</span>
             </button>
 
             {/* Export Dropdown */}
             <div className="relative flex-shrink-0">
               <button
                 onClick={() => setExportOpen(!exportOpen)}
-                className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition shadow-xs flex-shrink-0"
+                className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3.5 py-1.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition shadow-xs flex-shrink-0 cursor-pointer"
               >
                 <Download className="w-3.5 h-3.5" />
-                <span>Export</span>
+                <span className="hidden sm:inline">Export</span>
                 <ChevronDown className="w-3.5 h-3.5 ml-0.5" />
               </button>
 
@@ -325,6 +325,19 @@ export const Navbar: React.FC<NavbarProps> = ({
                 >
                   <X className="w-5 h-5" />
                 </button>
+              </div>
+
+              {/* Account & Profile Settings Section in Mobile Drawer */}
+              <div>
+                <div className="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                  Account & Settings
+                </div>
+                <AuthUserMenu
+                  inDrawer={true}
+                  onOpenAdmin={onOpenAdmin}
+                  onOpenSignUp={onOpenSignUp}
+                  onDrawerClose={() => setMobileDrawerOpen(false)}
+                />
               </div>
 
               {/* Navigation List */}
