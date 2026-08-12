@@ -31,10 +31,18 @@ export const AuthLandingPage: React.FC<AuthLandingPageProps> = ({ onContinueAsGu
   const [resetSuccessMessage, setResetSuccessMessage] = useState<string | null>(null);
   const [registerSuccessMessage, setRegisterSuccessMessage] = useState<string | null>(null);
 
-  // Synchronize mode if initialMode prop changes
+  // Synchronize mode if initialMode prop changes & check for email confirmation notices
   React.useEffect(() => {
     if (initialMode) {
       setMode(initialMode);
+    }
+    if (typeof window !== "undefined") {
+      const notice = sessionStorage.getItem("email_confirmed_notice");
+      if (notice) {
+        setRegisterSuccessMessage(notice);
+        sessionStorage.removeItem("email_confirmed_notice");
+        setMode("login");
+      }
     }
   }, [initialMode]);
 

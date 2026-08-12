@@ -16,6 +16,10 @@ import {
 } from "../lib/supabase";
 import { useResumeStore } from "../store/useResumeStore";
 import { DEFAULT_RESUME } from "../data/defaultResume";
+import {
+  trackUserInRegistry,
+  checkIsUserRestricted,
+} from "../lib/adminService";
 import { Lock, Loader2, CheckCircle2, X } from "lucide-react";
 
 interface AuthContextType {
@@ -57,25 +61,85 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
 
-    // Check if URL hash or query contains password recovery indicator
-    if (
-      typeof window !== "undefined" &&
-      (window.location.hash.includes("type=recovery") ||
-        window.location.search.includes("type=recovery") ||
-        window.location.hash.includes("access_token"))
-    ) {
-      setShowResetModal(true);
+    // Check if URL hash or query strictly indicates a password recovery flow vs signup confirmation
+    if (typeof window !== "undefined") {
+      const hash = window.location.hash;
+      const search = window.location.search;
+
+      const isRecovery =
+        hash.includes("type=recovery") || search.includes("type=recovery");
+      const isSignupConfirmation =
+        hash.includes("type=signup") ||
+        hash.includes("type=email_confirmation") ||
+        search.includes("type=signup");
+
+      if (isRecovery) {
+        setShowResetModal(true);
+      } else if (isSignupConfirmation) {
+        sessionStorage.setItem(
+          "email_confirmed_notice",
+          "Email address confirmed successfully! You can now sign in with your password."
+        );
+        window.history.replaceState(null, "", window.location.pathname);
+        supabase.auth.signOut().then(() => {
+          setCurrentUser(null);
+        });
+      }
     }
 
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       const user = session?.user ?? null;
-      setCurrentUser(user);
-      setLoading(false);
 
-      if (user) {
-        syncUserResumesOnLoad(user.id);
+      const hash = typeof window !== "undefined" ? window.location.hash : "";
+      const search = typeof window !== "undefined" ? window.location.search : "";
+
+      if (hash.includes("type=signup") || hash.includes("type=email_confirmation") || search.includes("type=signup")) {
+        window.history.replaceState(null, "", window.location.pathname);
+        supabase.auth.signOut().then(() => {
+          setCurrentUser(null);
+          setLoading(false);
+        });
+        return;
       }
+
+      if (hash.includes("type=recovery") || search.includes("type=recovery")) {
+        setShowResetModal(true);
+      } else {
+        if (user) {
+          checkIsUserRestricted(user.id, user.email || "").then((res) => {
+            if (res.isRestricted) {
+              supabase.auth.signOut().then(() => {
+                setCurrentUser(null);
+                setLoading(false);
+              });
+              return;
+            }
+            trackUserInRegistry({
+              id: user.id,
+              email: user.email || "",
+              display_name:
+                user.user_metadata?.display_name ||
+                user.user_metadata?.full_name ||
+                user.user_metadata?.name ||
+                (user as any).displayName ||
+                user.email?.split("@")[0],
+              avatar_url:
+                user.user_metadata?.avatar_url ||
+                user.user_metadata?.picture ||
+                (user as any).photoURL ||
+                "",
+            });
+            setCurrentUser(user);
+            syncUserResumesOnLoad(user.id);
+            setLoading(false);
+          });
+          return;
+        } else {
+          setCurrentUser(null);
+        }
+      }
+      setLoading(false);
     });
 
     // Listen for auth state changes
@@ -83,16 +147,58 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       const user = session?.user ?? null;
-      setCurrentUser(user);
-      setLoading(false);
 
-      if (event === "PASSWORD_RECOVERY") {
+      if ((event as string) === "PASSWORD_RECOVERY") {
         setShowResetModal(true);
+        setCurrentUser(user);
+        setLoading(false);
+        return;
       }
 
-      if (user) {
-        await syncUserResumesOnLoad(user.id);
+      const hash = typeof window !== "undefined" ? window.location.hash : "";
+      const search = typeof window !== "undefined" ? window.location.search : "";
+
+      if (hash.includes("type=signup") || hash.includes("type=email_confirmation") || search.includes("type=signup")) {
+        sessionStorage.setItem(
+          "email_confirmed_notice",
+          "Email address confirmed successfully! You can now sign in with your password."
+        );
+        window.history.replaceState(null, "", window.location.pathname);
+        await supabase.auth.signOut();
+        setCurrentUser(null);
+        setLoading(false);
+        return;
       }
+
+      if (user && (event as string) !== "PASSWORD_RECOVERY") {
+        const res = await checkIsUserRestricted(user.id, user.email || "");
+        if (res.isRestricted) {
+          await supabase.auth.signOut();
+          setCurrentUser(null);
+          setLoading(false);
+          return;
+        }
+        await trackUserInRegistry({
+          id: user.id,
+          email: user.email || "",
+          display_name:
+            user.user_metadata?.display_name ||
+            user.user_metadata?.full_name ||
+            user.user_metadata?.name ||
+            (user as any).displayName ||
+            user.email?.split("@")[0],
+          avatar_url:
+            user.user_metadata?.avatar_url ||
+            user.user_metadata?.picture ||
+            (user as any).photoURL ||
+            "",
+        });
+        setCurrentUser(user);
+        await syncUserResumesOnLoad(user.id);
+      } else {
+        setCurrentUser(user);
+      }
+      setLoading(false);
     });
 
     return () => {
@@ -136,9 +242,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setIsSyncing(true);
       const user = await signUpWithEmail(email, pass, name);
-      if (user && resumes.length > 0) {
-        for (const resume of resumes) {
-          await saveResumeToSupabase(user.id, resume);
+      if (user) {
+        await trackUserInRegistry({
+          id: user.id,
+          email: user.email || email,
+          display_name: name,
+        });
+        if (resumes.length > 0) {
+          for (const resume of resumes) {
+            await saveResumeToSupabase(user.id, resume);
+          }
         }
       }
       setLastSyncedAt(new Date());
@@ -152,6 +265,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsSyncing(true);
       const user = await signInWithEmail(email, pass);
       if (user) {
+        // Check restriction status before allowing access
+        const restriction = await checkIsUserRestricted(user.id, user.email || email);
+        if (restriction.isRestricted) {
+          await supabase.auth.signOut();
+          setCurrentUser(null);
+          throw new Error(
+            `Account Restricted: ${restriction.reason || "Your account has been restricted by an administrator. Please contact support at manassehlorlor@gmail.com."}`
+          );
+        }
+
+        await trackUserInRegistry({
+          id: user.id,
+          email: user.email || email,
+        });
+
         const cloudResumes = await fetchUserResumesFromSupabase(user.id);
         if (cloudResumes && cloudResumes.length > 0) {
           setResumes(cloudResumes);
